@@ -8,10 +8,11 @@ import PublicCartAccess from './PublicCartAccess.vue'
 import PublicCategoryNavigation from './PublicCategoryNavigation.vue'
 import PublicProductCard from './PublicProductCard.vue'
 import PublicUnitContext from './PublicUnitContext.vue'
-import { publicOrderingClient } from './client'
+import { publicOrderingClient, type RatingSummary } from './client'
 import { hydrateCartFromCatalog, loadCart, orderItems, receiptStorage, usePublicCart } from './cart'
 import { applyPublicTheme } from './theme'
 import { checkoutValidation } from './checkout'
+import { canonicalPhone, limitPhone, phoneMask } from '../../utils/phone'
 import type {
   Address, Confirmation, Product, PublicCatalog, PublicContext,
   SchedulingSlots, ServiceType, Simulation
@@ -23,6 +24,7 @@ const router = useRouter()
 const slug = computed(() => String(route.params.slug))
 const tableToken = computed(() => route.params.tableToken ? String(route.params.tableToken) : undefined)
 const context = ref<PublicContext>()
+const establishmentRating = ref<RatingSummary | null>(null)
 const catalog = ref<PublicCatalog>()
 const loading = ref(true)
 const error = ref<unknown>(null)
@@ -167,6 +169,8 @@ async function load() {
     ])
     context.value = resolvedContext
     catalog.value = resolvedCatalog
+    try { establishmentRating.value = await publicOrderingClient.ratingSummary(slug.value, controller.signal) }
+    catch { establishmentRating.value = null }
     hydrateCartFromCatalog(resolvedCatalog)
     const preferred = resolvedContext.table ? 'Table' : 'Pickup'
     checkout.serviceType = resolvedContext.availability?.find(item =>
@@ -465,6 +469,12 @@ function validateCheckout() {
     checkout.serviceType, checkout.paymentMethodId, customer, address
   )
 }
+function pastePhone(event: ClipboardEvent) {
+  const text = event.clipboardData?.getData('text') ?? ''
+  if (!/\d/.test(text)) return
+  event.preventDefault()
+  customer.phone = limitPhone(text)
+}
 async function confirm() {
   if (submitting.value) return
   if (quoteNeedsRecalculation.value) {
@@ -480,7 +490,7 @@ async function confirm() {
     let customerAddressId: string | null = null
     if (checkout.serviceType !== 'Table') {
       const identified = await publicOrderingClient.customer(slug.value, {
-        name: customer.name.trim(), phone: customer.phone.trim(),
+        name: customer.name.trim(), phone: canonicalPhone(customer.phone),
         email: customer.email.trim() || null,
         address: checkout.serviceType === 'Delivery' ? normalizedAddress(address) : null
       })
@@ -577,6 +587,7 @@ onBeforeUnmount(() => {
     <template v-else>
       <PublicUnitContext
         :context="context"
+        :summary="establishmentRating"
       />
       <aside v-if="step === 'catalog' && previousReference" class="resume-order">
         <span>Você tem um pedido recente.</span>
@@ -681,7 +692,8 @@ onBeforeUnmount(() => {
         <q-form @submit="confirm">
           <fieldset v-if="checkout.serviceType !== 'Table'"><legend>Seus dados</legend>
             <q-input v-model="customer.name" label="Nome" autocomplete="name" />
-            <q-input v-model="customer.phone" label="Telefone" autocomplete="tel" />
+            <q-input v-model="customer.phone" label="Telefone" autocomplete="tel" type="tel"
+              :mask="phoneMask(customer.phone)" unmasked-value @paste="pastePhone" />
             <q-input v-model="customer.email" label="E-mail (opcional)" autocomplete="email" type="email" />
           </fieldset>
           <fieldset><legend>Como você quer receber?</legend>

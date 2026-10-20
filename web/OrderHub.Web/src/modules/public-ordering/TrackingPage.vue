@@ -15,6 +15,8 @@ const order = ref<Tracking>()
 const error = ref<unknown>(null)
 const loading = ref(true)
 const cancelling = ref(false)
+const reviewAvailable = ref(false)
+const reviewPending = ref(false)
 const reason = ref('')
 let timer: ReturnType<typeof setTimeout> | undefined
 let failures = 0
@@ -40,6 +42,15 @@ async function refresh() {
   if (document.visibilityState === 'hidden') { schedule(); return }
   try {
     order.value = await publicOrderingClient.track(reference)
+    reviewAvailable.value = false
+    reviewPending.value = false
+    if (order.value.status === 'Completed') {
+      try {
+        const progress = await publicOrderingClient.reviewProgress(reference)
+        reviewAvailable.value = progress.canReview
+        reviewPending.value = progress.pendingApproval
+      } catch { /* Falha de reviews não afeta o acompanhamento do pedido. */ }
+    }
     error.value = null
     failures = 0
   } catch (failure) {
@@ -96,6 +107,8 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
           </div>
           <span v-if="!terminalOrderStatuses.has(order.status)" class="tracking-live"><span aria-hidden="true"></span> Atualizando</span>
         </section>
+
+        <q-btn v-if="reviewAvailable || reviewPending" color="primary" icon="star" :label="reviewPending ? 'Ver avaliação enviada' : 'Avaliar pedido'" :to="`/order/review/${encodeURIComponent(reference)}`" class="review-invitation" />
 
         <div class="tracking-grid">
           <section class="tracking-card tracking-history">

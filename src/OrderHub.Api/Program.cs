@@ -72,10 +72,13 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("authentication-attempts", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    options.AddPolicy("public-review-submissions", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
     options.OnRejected = async (context, cancellationToken) =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        await context.HttpContext.Response.WriteAsJsonAsync(new { title = "Não foi possível concluir a autenticação.", status = 429 }, cancellationToken);
+        await context.HttpContext.Response.WriteAsJsonAsync(new { title = "Muitas solicitações. Tente novamente em instantes.", status = 429 }, cancellationToken);
     };
 });
 builder.Services.AddAuthorization(options =>
@@ -106,6 +109,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => false }
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 app.MapCatalogEndpoints();
 app.MapPublicOrderingEndpoints();
+app.MapReviewEndpoints();
 app.MapAdministrationEndpoints();
 app.MapOnboardingEndpoints();
 app.MapAdministrativeUserEndpoints();

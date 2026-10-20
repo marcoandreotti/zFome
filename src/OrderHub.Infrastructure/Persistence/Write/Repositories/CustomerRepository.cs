@@ -23,13 +23,31 @@ public sealed class CustomerRepository(OrderHubDbContext context) : ICustomerRep
         Guid establishmentId,
         string normalizedPhone,
         CancellationToken cancellationToken) =>
-        context.Customers
+        FindMatchingCustomerAsync(tenantId, establishmentId, normalizedPhone, cancellationToken);
+
+    private async Task<Customer?> FindMatchingCustomerAsync(
+        Guid tenantId,
+        Guid establishmentId,
+        string normalizedPhone,
+        CancellationToken cancellationToken)
+    {
+        var candidates = Customer.GetPhoneLookupCandidates(normalizedPhone);
+        var matches = await context.Customers
             .Include(x => x.Addresses)
-            .SingleOrDefaultAsync(
+            .Where(
                 x => x.TenantId == tenantId
                     && x.EstablishmentId == establishmentId
-                    && x.NormalizedPhone == normalizedPhone,
-                cancellationToken);
+                    && candidates.Contains(x.NormalizedPhone))
+            .OrderBy(x => x.Id)
+            .Take(2)
+            .ToArrayAsync(cancellationToken);
+        if (matches.Length > 1)
+        {
+            throw new ConflictException("Multiple customer records match this phone in the establishment.");
+        }
+
+        return matches.SingleOrDefault();
+    }
 
     public async Task AddAsync(Customer customer, CancellationToken cancellationToken)
     {

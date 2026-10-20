@@ -15,6 +15,30 @@ public sealed class CustomerTests
         Assert.Null(customer.Email);
     }
 
+    [Theory]
+    [InlineData("+55 (0)19 99999-9999", "19999999999")]
+    [InlineData("+55019999999999", "19999999999")]
+    [InlineData("55019999999999", "19999999999")]
+    [InlineData("019999999999", "19999999999")]
+    [InlineData("19999999999", "19999999999")]
+    [InlineData("+5555999999999", "55999999999")]
+    [InlineData("55199999999999", "55199999999999")]
+    [InlineData("55020999999999", "55020999999999")]
+    [InlineData("+1 (212) 555-0100", "12125550100")]
+    public void Phone_normalization_is_idempotent_and_preserves_other_valid_formats(string input, string expected)
+    {
+        var normalized = Customer.NormalizePhone(input);
+
+        Assert.Equal(expected, normalized);
+        Assert.Equal(normalized, Customer.NormalizePhone(normalized));
+    }
+
+    [Fact]
+    public void Ddd_55_without_country_code_is_preserved()
+    {
+        Assert.Equal("55999999999", Customer.NormalizePhone("55999999999"));
+    }
+
     [Fact]
     public void Customer_rejects_invalid_scope_and_contact()
     {

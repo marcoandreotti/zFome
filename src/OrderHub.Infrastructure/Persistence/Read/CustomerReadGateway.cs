@@ -24,7 +24,7 @@ public sealed class CustomerReadGateway(IReadConnectionFactory connectionFactory
               and c.establishment_id = @EstablishmentId
               and (@Search is null
                    or c.name ilike '%' || @Search || '%'
-                   or c.normalized_phone like '%' || @NormalizedSearch || '%'
+                   or c.normalized_phone like any(@NormalizedSearches)
                    or c.email ilike '%' || @Search || '%');
 
             select c.id, c.name, c.phone, c.email
@@ -33,7 +33,7 @@ public sealed class CustomerReadGateway(IReadConnectionFactory connectionFactory
               and c.establishment_id = @EstablishmentId
               and (@Search is null
                    or c.name ilike '%' || @Search || '%'
-                   or c.normalized_phone like '%' || @NormalizedSearch || '%'
+                   or c.normalized_phone like any(@NormalizedSearches)
                    or c.email ilike '%' || @Search || '%')
             order by c.name, c.id
             offset @Offset rows fetch next @PageSize rows only;
@@ -42,12 +42,19 @@ public sealed class CustomerReadGateway(IReadConnectionFactory connectionFactory
         var normalizedSearch = string.IsNullOrWhiteSpace(search)
             ? null
             : new string(search.Where(char.IsDigit).ToArray());
+        var normalizedSearches = string.IsNullOrEmpty(normalizedSearch)
+            ? Array.Empty<string>()
+            : (normalizedSearch.Length is >= 8 and <= 15
+                ? OrderHub.Domain.Customers.Customer.GetPhoneLookupCandidates(normalizedSearch)
+                : [normalizedSearch])
+            .Select(value => $"%{value}%")
+            .ToArray();
         var parameters = new
         {
             TenantId = tenantId,
             EstablishmentId = establishmentId,
             Search = string.IsNullOrWhiteSpace(search) ? null : search.Trim(),
-            NormalizedSearch = normalizedSearch,
+            NormalizedSearches = normalizedSearches,
             Offset = (page - 1) * pageSize,
             PageSize = pageSize
         };

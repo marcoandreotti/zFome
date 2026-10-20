@@ -25,6 +25,9 @@ export function createPublicOrderingClient(http: AxiosInstance) {
       '/api/public/establishments/' + encodeURIComponent(slug) + '/catalog', { signal }
     )).data
   },
+  async ratingSummary(slug: string, signal?: AbortSignal) {
+    return (await http.get<RatingSummary | null>(`/api/public/establishments/${encodeURIComponent(slug)}/rating-summary`, { signal })).data
+  },
   async scheduleSlots(slug: string, serviceType: ServiceType, signal?: AbortSignal) {
     return (await http.get<SchedulingSlots>(path(slug) + '/schedule-slots', {
       params: { serviceType }, signal
@@ -55,9 +58,29 @@ export function createPublicOrderingClient(http: AxiosInstance) {
       '/api/public/ordering/orders/' + encodeURIComponent(reference) + '/cancel',
       { reason }
     )
+  },
+  async reviewProgress(reference: string, signal?: AbortSignal) {
+    return (await http.get<ReviewEligibility>(`/api/public/ordering/orders/${encodeURIComponent(reference)}/reviews`, { signal })).data
+  },
+  async submitReviews(reference: string, value: PublishReviews, key: string) {
+    return (await http.post<{ submittedAt: string; ratingsSubmitted: number }>(
+      `/api/public/ordering/orders/${encodeURIComponent(reference)}/reviews`, value,
+      { headers: { 'Idempotency-Key': key } }
+    )).data
   }
   }
 }
+
+export interface ReviewEligibility {
+  canReview: boolean; expiresAt: string | null; establishmentReviewed: boolean; pendingApproval: boolean
+  establishmentName?: string; establishmentLogoUrl?: string | null; establishmentSlug?: string
+  products: { productId: string; productName: string; reviewed: boolean }[]
+}
+export interface PublishReviews {
+  establishmentRating: number; establishmentComment: string | null
+  products: { productId: string; rating: number; comment: string | null }[]
+}
+export interface RatingSummary { targetId: string; average: number; count: number; rating1Count: number; rating2Count: number; rating3Count: number; rating4Count: number; rating5Count: number }
 
 export const publicOrderingClient = createPublicOrderingClient(
   axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL ?? '' })

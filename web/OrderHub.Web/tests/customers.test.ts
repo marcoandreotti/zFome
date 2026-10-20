@@ -72,6 +72,11 @@ it('pesquisa na página solicitada e mantém o contato após erro', async () => 
     .find((x) => x.text() === 'Nome')!
     .find('input')
   await name.setValue('Maria editada')
+  const phone = wrapper
+    .findAll('label')
+    .find((x) => x.text() === 'Telefone')!
+    .find('input')
+  await phone.setValue('+55 (0) 19 99999-9999')
   vi.mocked(customersClient.save).mockRejectedValue(
     new ApiError({
       status: 400,
@@ -85,6 +90,11 @@ it('pesquisa na página solicitada e mantém o contato após erro', async () => 
     .find((x) => x.text() === 'Confirmar')!
     .trigger('click')
   await flushPromises()
+  expect(customersClient.save).toHaveBeenCalledWith(
+    'unit',
+    'customer',
+    expect.objectContaining({ phone: '19999999999' })
+  )
   expect(wrapper.text()).toContain('Telefone inválido.')
   expect((name.element as HTMLInputElement).value).toBe('Maria editada')
   wrapper.unmount()

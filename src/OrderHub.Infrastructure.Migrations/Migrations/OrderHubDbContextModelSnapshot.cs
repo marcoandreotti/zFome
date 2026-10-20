@@ -17,7 +17,7 @@ namespace OrderHub.Infrastructure.Migrations.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.8")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -2041,6 +2041,188 @@ namespace OrderHub.Infrastructure.Migrations.Migrations
                         });
                 });
 
+            modelBuilder.Entity("OrderHub.Domain.Reviews.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<string>("ModerationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("moderation_reason");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("rating");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<string>("TargetKind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("target_kind");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "EstablishmentId", "CreatedAt", "Id")
+                        .HasDatabaseName("ix_review_public_published")
+                        .HasFilter("status = 'Published'");
+
+                    b.HasIndex("TenantId", "EstablishmentId", "OrderId", "TargetKind", "TargetId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_review_order_target");
+
+                    b.HasIndex("TenantId", "EstablishmentId", "Status", "CreatedAt", "Id")
+                        .HasDatabaseName("ix_review_admin_status_created");
+
+                    b.ToTable("review", "reviews", t =>
+                        {
+                            t.HasCheckConstraint("ck_review_comment", "(rating >= 3) or (comment is not null and length(trim(comment)) between 10 and 1000)");
+
+                            t.HasCheckConstraint("ck_review_rating", "rating between 1 and 5");
+
+                            t.HasCheckConstraint("ck_review_status", "status in ('Pending', 'Published', 'Hidden', 'Rejected')");
+
+                            t.HasCheckConstraint("ck_review_target", "(target_kind = 'Establishment' and target_id = establishment_id) or target_kind = 'Product'");
+                        });
+                });
+
+            modelBuilder.Entity("OrderHub.Domain.Reviews.ReviewModerationHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("action");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_id");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ReviewId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("review_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "EstablishmentId", "ReviewId", "OccurredAt", "Id")
+                        .HasDatabaseName("ix_review_moderation_review_time");
+
+                    b.ToTable("review_moderation_history", "reviews", t =>
+                        {
+                            t.HasCheckConstraint("ck_review_moderation_action", "action in ('Approved', 'Rejected', 'Hidden', 'Restored')");
+                        });
+                });
+
+            modelBuilder.Entity("OrderHub.Domain.Reviews.ReviewRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("PayloadHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("result_json");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "EstablishmentId", "Key")
+                        .IsUnique()
+                        .HasDatabaseName("ux_review_request_scope_key");
+
+                    b.ToTable("review_request", "reviews", t =>
+                        {
+                            t.HasCheckConstraint("ck_review_request_payload_hash", "length(payload_hash) = 64");
+                        });
+                });
+
             modelBuilder.Entity("OrderHub.Domain.Tenancy.Establishment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2275,6 +2457,67 @@ namespace OrderHub.Infrastructure.Migrations.Migrations
                     b.ToTable("order_number_counter", "orders", t =>
                         {
                             t.HasCheckConstraint("ck_order_number_counter", "last_number > 0");
+                        });
+                });
+
+            modelBuilder.Entity("OrderHub.Infrastructure.Persistence.Write.Configurations.ReviewRatingSummaryRecord", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("EstablishmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("establishment_id");
+
+                    b.Property<string>("TargetKind")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("target_kind");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
+
+                    b.Property<long>("Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("count");
+
+                    b.Property<long>("Rating1Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rating_1_count");
+
+                    b.Property<long>("Rating2Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rating_2_count");
+
+                    b.Property<long>("Rating3Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rating_3_count");
+
+                    b.Property<long>("Rating4Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rating_4_count");
+
+                    b.Property<long>("Rating5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rating_5_count");
+
+                    b.Property<long>("RatingSum")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rating_sum");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("TenantId", "EstablishmentId", "TargetKind", "TargetId");
+
+                    b.ToTable("rating_summary", "reviews", t =>
+                        {
+                            t.HasCheckConstraint("ck_rating_summary_counts", "count >= 0 and rating_sum >= 0 and rating_1_count >= 0 and rating_2_count >= 0 and rating_3_count >= 0 and rating_4_count >= 0 and rating_5_count >= 0 and count = rating_1_count + rating_2_count + rating_3_count + rating_4_count + rating_5_count and rating_sum = rating_1_count + 2 * rating_2_count + 3 * rating_3_count + 4 * rating_4_count + 5 * rating_5_count");
+
+                            t.HasCheckConstraint("ck_rating_summary_target", "(target_kind = 'Establishment' and target_id = establishment_id) or target_kind = 'Product'");
                         });
                 });
 
@@ -3192,6 +3435,43 @@ namespace OrderHub.Infrastructure.Migrations.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OrderHub.Domain.Reviews.Review", b =>
+                {
+                    b.HasOne("OrderHub.Domain.Tenancy.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "EstablishmentId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OrderHub.Domain.Ordering.Order", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "EstablishmentId", "OrderId")
+                        .HasPrincipalKey("TenantId", "EstablishmentId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OrderHub.Domain.Reviews.ReviewModerationHistory", b =>
+                {
+                    b.HasOne("OrderHub.Domain.Reviews.Review", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "EstablishmentId", "ReviewId")
+                        .HasPrincipalKey("TenantId", "EstablishmentId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OrderHub.Domain.Reviews.ReviewRequest", b =>
+                {
+                    b.HasOne("OrderHub.Domain.Tenancy.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "EstablishmentId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OrderHub.Domain.Tenancy.Establishment", b =>
                 {
                     b.HasOne("OrderHub.Domain.Tenancy.Tenant", null)
@@ -3267,6 +3547,16 @@ namespace OrderHub.Infrastructure.Migrations.Migrations
                 });
 
             modelBuilder.Entity("OrderHub.Infrastructure.Persistence.Write.Configurations.OrderNumberCounter", b =>
+                {
+                    b.HasOne("OrderHub.Domain.Tenancy.Establishment", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "EstablishmentId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OrderHub.Infrastructure.Persistence.Write.Configurations.ReviewRatingSummaryRecord", b =>
                 {
                     b.HasOne("OrderHub.Domain.Tenancy.Establishment", null)
                         .WithMany()

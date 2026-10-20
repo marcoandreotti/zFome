@@ -39,6 +39,7 @@ export interface ProductVariation {
 export interface Product {
   id: string; code: string; name: string; description: string | null
   basePrice: number; isFeatured: boolean; isActive: boolean; allowsNotes: boolean
+  ratingAverage?: number | null; ratingCount?: number
   images: { id: string; url: string; order: number; isPrincipal: boolean }[]
   variations: ProductVariation[]; additionalGroups: AdditionalGroup[]
   isAvailable?: boolean; unavailabilityReason?: string | null; availableAgainAt?: string | null

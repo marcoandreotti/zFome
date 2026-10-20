@@ -70,6 +70,57 @@ public sealed class CustomerPersistenceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Repository_finds_legacy_phone_forms_without_merging_or_crossing_establishments()
+    {
+        var options = new DbContextOptionsBuilder<OrderHubDbContext>().UseNpgsql(database.GetConnectionString()).Options;
+        await using var context = new OrderHubDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        var now = DateTimeOffset.UtcNow;
+        var tenant = Tenant.Create("Group", now);
+        var firstUnit = Establishment.Create(tenant.Id, "First", new Slug("first"), now);
+        var secondUnit = Establishment.Create(tenant.Id, "Second", new Slug("second"), now);
+        context.AddRange(tenant, firstUnit, secondUnit);
+        await context.SaveChangesAsync();
+
+        var legacy = Customer.Create(tenant.Id, firstUnit.Id, "Legacy", "19999999999", null, now);
+        context.Customers.Add(legacy);
+        await context.SaveChangesAsync();
+        await context.Database.ExecuteSqlInterpolatedAsync($"update customers.customer set normalized_phone = '55019999999999' where id = {legacy.Id}");
+
+        var repository = new CustomerRepository(context);
+        var found = await repository.FindByNormalizedPhoneAsync(tenant.Id, firstUnit.Id, "+55019999999999", CancellationToken.None);
+        var isolated = await repository.FindByNormalizedPhoneAsync(tenant.Id, secondUnit.Id, "19999999999", CancellationToken.None);
+
+        Assert.Equal(legacy.Id, found!.Id);
+        Assert.Null(isolated);
+        Assert.Equal("19999999999", legacy.Phone);
+    }
+
+    [Fact]
+    public async Task Repository_reports_ambiguous_legacy_phone_records_without_merging_them()
+    {
+        var options = new DbContextOptionsBuilder<OrderHubDbContext>().UseNpgsql(database.GetConnectionString()).Options;
+        await using var context = new OrderHubDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        var now = DateTimeOffset.UtcNow;
+        var tenant = Tenant.Create("Group", now);
+        var unit = Establishment.Create(tenant.Id, "Unit", new Slug("unit"), now);
+        context.AddRange(tenant, unit);
+        await context.SaveChangesAsync();
+        var first = Customer.Create(tenant.Id, unit.Id, "First", "19999999999", null, now);
+        var second = Customer.Create(tenant.Id, unit.Id, "Second", "11999999999", null, now);
+        context.Customers.AddRange(first, second);
+        await context.SaveChangesAsync();
+        await context.Database.ExecuteSqlInterpolatedAsync($"update customers.customer set normalized_phone = '55019999999999' where id = {second.Id}");
+
+        var repository = new CustomerRepository(context);
+
+        await Assert.ThrowsAsync<ConflictException>(() => repository.FindByNormalizedPhoneAsync(
+            tenant.Id, unit.Id, "19999999999", CancellationToken.None));
+        Assert.Equal(2, await context.Customers.CountAsync(x => x.TenantId == tenant.Id && x.EstablishmentId == unit.Id));
+    }
+
+    [Fact]
     public async Task Concurrent_primary_address_changes_keep_one_atomic_winner()
     {
         var options = new DbContextOptionsBuilder<OrderHubDbContext>().UseNpgsql(database.GetConnectionString()).Options;

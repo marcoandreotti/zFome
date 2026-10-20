@@ -474,6 +474,30 @@ describe('checkout idempotente', () => {
     expect(wrapper.get('[role="alert"]').text()).toContain('total mudou')
     wrapper.unmount()
   })
+
+  it('canonicaliza telefone formatado com código do país antes de enviar', async () => {
+    localStorage.setItem('orderhub.public-cart.unit', JSON.stringify({
+      version: 1, slug: 'unit', items: [{
+        key: 'line', productId: 'p1', variationId: null, quantity: 1, notes: null,
+        additionals: [], productName: 'Pizza', variationName: null, displayedUnitPrice: 22
+      }]
+    }))
+    const wrapper = mount(PublicOrderingPage, { global: { stubs } })
+    await flushPromises()
+    await wrapper.findAll('button').find(button => button.text() === 'Carrinho (1)')!.trigger('click')
+    await flushPromises()
+    await wrapper.findAll('button').find(button => button.text() === 'Continuar')!.trigger('click')
+    const labels = wrapper.findAll('label')
+    await labels.find(label => label.text().startsWith('Nome'))!.find('input').setValue('Ana')
+    await labels.find(label => label.text().startsWith('Telefone'))!.find('input')
+      .setValue('+55 (0) 19 99999-9999')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(publicOrderingClient.customer).toHaveBeenCalledWith('unit',
+      expect.objectContaining({ phone: '19999999999' }))
+    expect(publicOrderingClient.confirm).toHaveBeenCalled()
+    wrapper.unmount()
+  })
 })
 
 it.each([

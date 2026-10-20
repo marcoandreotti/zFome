@@ -30,9 +30,19 @@ Um cliente MAY possuir múltiplos endereços completos e SHALL possuir no máxim
 ### Requirement: Contatos de cliente são normalizados por estabelecimento
 O sistema SHALL normalizar nome, telefone e e-mail opcional antes da persistência e MUST aplicar qualquer critério de unicidade somente no escopo do mesmo estabelecimento.
 
+Telefones brasileiros com 10 ou 11 dígitos nacionais SHALL usar a forma nacional sem código do país `55` e sem prefixo de tronco `0`. Formas legadas equivalentes SHALL ser localizadas no mesmo estabelecimento sem mesclar ou remover registros automaticamente; se mais de um registro corresponder, a operação SHALL retornar conflito.
+
 #### Scenario: Mesmo telefone no mesmo estabelecimento
 - **WHEN** um cliente já registrado for identificado pelo telefone normalizado dentro do mesmo estabelecimento
 - **THEN** o sistema SHALL atualizar ou reutilizar esse registro conforme a operação solicitada sem criar duplicação acidental
+
+#### Scenario: Telefone brasileiro com código do país e prefixo de tronco
+- **WHEN** `+55 (0)19 99999-9999` e `19999999999` forem usados no mesmo estabelecimento
+- **THEN** o sistema SHALL normalizar ambos para `19999999999` e reutilizar o registro correspondente
+
+#### Scenario: Registros legados equivalentes ambíguos
+- **WHEN** mais de um registro legado do estabelecimento corresponder ao mesmo telefone brasileiro normalizado
+- **THEN** o sistema SHALL retornar conflito sem mesclar nem remover registros
 
 ### Requirement: Endereços pertencem ao cliente e ao mesmo estabelecimento
 Cada endereço MUST pertencer ao mesmo Tenant e estabelecimento do cliente, SHALL conter os dados necessários para entrega e MUST impedir associação cruzada.

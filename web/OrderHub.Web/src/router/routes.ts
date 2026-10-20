@@ -2,6 +2,11 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const routes: RouteRecordRaw[] = [
   {
+    path: '/order/review/:reference',
+    component: () => import('../layouts/PublicLayout.vue'),
+    children: [ { path: '', component: () => import('../modules/public-ordering/ReviewPage.vue') } ]
+  },
+  {
     path: '/order/track/:reference',
     component: () => import('../layouts/PublicLayout.vue'),
     children: [
@@ -150,6 +155,11 @@ export const routes: RouteRecordRaw[] = [
         meta: { capability: 'management' },
         component: () =>
           import('../modules/administration/communications/CommunicationsPage.vue')
+      },
+      {
+        path: 'reviews',
+        meta: { capability: 'management' },
+        component: () => import('../modules/administration/reviews/ReviewsPage.vue')
       },
       {
         path: 'foundation',

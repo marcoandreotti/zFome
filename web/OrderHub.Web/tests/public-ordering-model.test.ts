@@ -168,8 +168,10 @@ it('valida dados necessários para mesa, retirada e entrega', () => {
   }
   expect(checkoutValidation('Table', 'pay', { name: '', phone: '' }, emptyAddress)).toBe('')
   expect(checkoutValidation('Pickup', 'pay', { name: '', phone: '' }, emptyAddress)).toContain('nome')
-  expect(checkoutValidation('Pickup', 'pay', { name: 'Ana', phone: '1199' }, emptyAddress)).toBe('')
-  expect(checkoutValidation('Delivery', 'pay', { name: 'Ana', phone: '1199' }, emptyAddress)).toContain('endereço')
-  expect(checkoutValidation('Delivery', 'pay', { name: 'Ana', phone: '1199' }, validAddress)).toBe('')
+  expect(checkoutValidation('Pickup', 'pay', { name: 'Ana', phone: '1199' }, emptyAddress)).toContain('telefone')
+  expect(checkoutValidation('Pickup', 'pay', { name: 'Ana', phone: '11999999999' }, emptyAddress)).toBe('')
+  expect(checkoutValidation('Delivery', 'pay', { name: 'Ana', phone: '1199' }, emptyAddress)).toContain('telefone')
+  expect(checkoutValidation('Delivery', 'pay', { name: 'Ana', phone: '11999999999' }, emptyAddress)).toContain('endereço')
+  expect(checkoutValidation('Delivery', 'pay', { name: 'Ana', phone: '11999999999' }, validAddress)).toBe('')
   expect(checkoutValidation('Table', '', { name: '', phone: '' }, emptyAddress)).toContain('pagamento')
 })

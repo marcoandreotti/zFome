@@ -21,7 +21,15 @@ public sealed class CatalogReadGateway(IReadConnectionFactory connectionFactory)
         var scope = new { establishment.TenantId, EstablishmentId = establishment.Id };
         var active = publicOnly ? " and is_active = true" : string.Empty;
         var categories = (await connection.QueryAsync<CategoryRow>(new CommandDefinition($"select id Id, parent_category_id ParentId, name Name, description Description, \"order\" \"Order\", image_url ImageUrl, is_active IsActive from catalog.category where tenant_id=@TenantId and establishment_id=@EstablishmentId{active} order by \"order\", name", scope, cancellationToken: cancellationToken))).ToList();
-        var products = (await connection.QueryAsync<ProductRow>(new CommandDefinition($"select id Id, category_id CategoryId, code Code, name Name, description Description, base_price BasePrice, is_featured IsFeatured, is_active IsActive, allows_notes AllowsNotes from catalog.product where tenant_id=@TenantId and establishment_id=@EstablishmentId{active} order by name", scope, cancellationToken: cancellationToken))).ToList();
+        var products = (await connection.QueryAsync<ProductRow>(new CommandDefinition($"""
+            select p.id Id, p.category_id CategoryId, p.code Code, p.name Name, p.description Description,
+                p.base_price BasePrice, p.is_featured IsFeatured, p.is_active IsActive, p.allows_notes AllowsNotes,
+                case when rs.count > 0 then (rs.rating_sum::numeric / rs.count)::numeric(4,2) end RatingAverage,
+                coalesce(rs.count,0) RatingCount
+            from catalog.product p left join reviews.rating_summary rs on rs.tenant_id=p.tenant_id
+                and rs.establishment_id=p.establishment_id and rs.target_kind='Product' and rs.target_id=p.id
+            where p.tenant_id=@TenantId and p.establishment_id=@EstablishmentId{active.Replace("is_active", "p.is_active")} order by p.name
+            """, scope, cancellationToken: cancellationToken))).ToList();
         var productIds = products.Select(x => x.Id).ToArray();
         var images = productIds.Length == 0 ? [] : (await connection.QueryAsync<ImageRow>(new CommandDefinition("select id Id, product_id ProductId, url Url, \"order\" \"Order\", is_principal IsPrincipal from catalog.product_image where product_id=any(@Ids) order by \"order\"", new { Ids = productIds }, cancellationToken: cancellationToken))).ToList();
         var variations = productIds.Length == 0 ? [] : (await connection.QueryAsync<VariationRow>(new CommandDefinition($"select id Id, product_id ProductId, name Name, price Price, \"order\" \"Order\", is_active IsActive from catalog.product_variation where product_id=any(@Ids){active} order by \"order\"", new { Ids = productIds }, cancellationToken: cancellationToken))).ToList();
@@ -42,14 +50,14 @@ public sealed class CatalogReadGateway(IReadConnectionFactory connectionFactory)
             ? null
             : new DateTimeOffset(DateTime.SpecifyKind(row.EndsAt.Value, DateTimeKind.Utc));
         var groupById = groups.ToDictionary(x => x.Id, x => new AdditionalGroupReadModel(x.Id, x.Name, x.MinimumSelection, x.MaximumSelection, x.IsActive, 0, groupItems.Where(i => i.GroupId == x.Id).Select(i => { var u=Unavailable(2,i.Id); var rules = compatibilityRules.Where(rule => rule.GroupId == i.GroupId && rule.AdditionalId == i.Id).Select(rule => new ModifierCompatibilityReadModel(rule.TargetGroupId, rule.TargetAdditionalId, rule.Kind)).ToArray(); return new AdditionalReadModel(i.Id, i.Name, i.Price, i.IsActive, i.Order, u is null, u?.Reason, AvailableAgain(u), rules); }).ToList(), x.PricingStrategy, x.Type, x.RequiresCompleteComposition));
-        var productModels = products.Select(p => { var u=Unavailable(0,p.Id); return new ProductReadModel(p.Id, p.Code, p.Name, p.Description, p.BasePrice, p.IsFeatured, p.IsActive, p.AllowsNotes, images.Where(x => x.ProductId == p.Id).Select(x => new ProductImageReadModel(x.Id, x.Url, x.Order, x.IsPrincipal)).ToList(), variations.Where(x => x.ProductId == p.Id).Select(x => { var vu=Unavailable(1,x.Id); return new ProductVariationReadModel(x.Id, x.Name, x.Price, x.Order, x.IsActive, vu is null, vu?.Reason, AvailableAgain(vu)); }).ToList(), links.Where(x => x.ProductId == p.Id && groupById.ContainsKey(x.GroupId)).Select(x => groupById[x.GroupId] with { Order = x.Order }).ToList(), u is null, u?.Reason, AvailableAgain(u)); }).ToList();
+        var productModels = products.Select(p => { var u=Unavailable(0,p.Id); return new ProductReadModel(p.Id, p.Code, p.Name, p.Description, p.BasePrice, p.IsFeatured, p.IsActive, p.AllowsNotes, images.Where(x => x.ProductId == p.Id).Select(x => new ProductImageReadModel(x.Id, x.Url, x.Order, x.IsPrincipal)).ToList(), variations.Where(x => x.ProductId == p.Id).Select(x => { var vu=Unavailable(1,x.Id); return new ProductVariationReadModel(x.Id, x.Name, x.Price, x.Order, x.IsActive, vu is null, vu?.Reason, AvailableAgain(vu)); }).ToList(), links.Where(x => x.ProductId == p.Id && groupById.ContainsKey(x.GroupId)).Select(x => groupById[x.GroupId] with { Order = x.Order }).ToList(), u is null, u?.Reason, AvailableAgain(u), p.RatingAverage, p.RatingCount); }).ToList();
         var categoryModels = categories.Select(c => new CategoryReadModel(c.Id, c.ParentId, c.Name, c.Description, c.Order, c.ImageUrl, c.IsActive, productModels.Where(p => products.Single(x => x.Id == p.Id).CategoryId == c.Id).ToList())).Where(c => !publicOnly || c.Products.Count > 0).ToList();
         return new CatalogReadModel(establishment.Id, establishment.Name, establishment.Slug, categoryModels);
     }
 
     private sealed record EstablishmentRow(Guid Id, Guid TenantId, string Name, string Slug);
     private sealed record CategoryRow(Guid Id, Guid? ParentId, string Name, string? Description, int Order, string? ImageUrl, bool IsActive);
-    private sealed record ProductRow(Guid Id, Guid CategoryId, string Code, string Name, string? Description, decimal BasePrice, bool IsFeatured, bool IsActive, bool AllowsNotes);
+    private sealed record ProductRow(Guid Id, Guid CategoryId, string Code, string Name, string? Description, decimal BasePrice, bool IsFeatured, bool IsActive, bool AllowsNotes, decimal? RatingAverage, long RatingCount);
     private sealed record ImageRow(Guid Id, Guid ProductId, string Url, int Order, bool IsPrincipal);
     private sealed record VariationRow(Guid Id, Guid ProductId, string Name, decimal Price, int Order, bool IsActive);
     private sealed record GroupRow(Guid Id, string Name, int MinimumSelection, int MaximumSelection, bool IsActive, string PricingStrategy, string Type, bool RequiresCompleteComposition);

@@ -4,6 +4,12 @@ import { isCancel } from 'axios'
 import { ApiError } from '../../../http/client'
 import ProblemBanner from '../../../components/ProblemBanner.vue'
 import { useSessionStore } from '../../session/store'
+import {
+  canonicalPhone,
+  limitPhone,
+  phoneMask,
+  phoneValidationMessage
+} from '../../../utils/phone'
 import { customersClient, type Customer, type Address } from './client'
 const session = useSessionStore()
 const rows = ref<Customer[]>([]),
@@ -54,6 +60,10 @@ const required = (value: string | null) =>
   !!value?.trim() || 'Campo obrigatório'
 const field = (key: string) =>
   editError.value instanceof ApiError ? editError.value.field(key) : undefined
+const validPhone = (value: string) => {
+  const requiredMessage = required(value)
+  return requiredMessage === true ? phoneValidationMessage(value) || true : requiredMessage
+}
 let request: AbortController | undefined
 async function load() {
   if (!session.unitId) return
@@ -87,7 +97,7 @@ function filter() {
 }
 function open(row?: Customer, showAddresses = false) {
   customer.value = row
-    ? { ...row, addresses: row.addresses.map((item) => ({ ...item })) }
+    ? { ...row, phone: canonicalPhone(row.phone), addresses: row.addresses.map((item) => ({ ...item })) }
     : { id: '', name: '', phone: '', email: null, addresses: [] }
   editError.value = null
   message.value = ''
@@ -98,6 +108,12 @@ function openAddress(row?: Address) {
   address.value = row ? { ...row } : blankAddress()
   editError.value = null
   addressEditor.value = true
+}
+function pastePhone(event: ClipboardEvent) {
+  const text = event.clipboardData?.getData('text') ?? ''
+  if (!/\d/.test(text)) return
+  event.preventDefault()
+  customer.value.phone = limitPhone(text)
 }
 function askRemove(item: Address) {
   address.value = { ...item }
@@ -112,7 +128,7 @@ async function save() {
     if (action === 'customer') {
       await customersClient.save(session.unitId, customer.value.id || null, {
         name: customer.value.name,
-        phone: customer.value.phone,
+        phone: canonicalPhone(customer.value.phone),
         email: customer.value.email || null
       })
       editor.value = false
@@ -253,9 +269,12 @@ onUnmounted(() => request?.abort())
               type="tel"
               label="Telefone"
               maxlength="30"
-              :rules="[required]"
+              :mask="phoneMask(customer.phone)"
+              unmasked-value
+              :rules="[validPhone]"
               :error="!!field('phone')"
               :error-message="field('phone')"
+              @paste="pastePhone"
             />
             <q-input
               v-model="customer.email"

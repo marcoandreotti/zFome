@@ -23,6 +23,8 @@ using OrderHub.Application.Identity.Authentication;
 using OrderHub.Application.Identity.Management;
 using OrderHub.Application.Availability;
 using OrderHub.Application.Delivery;
+using OrderHub.Application.Reviews;
+using OrderHub.Application.Abstractions.Reviews;
 using OrderHub.Application.Abstractions.Delivery;
 using OrderHub.Application.Abstractions.Reporting;
 using OrderHub.Application.Reporting;
@@ -201,6 +203,16 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ListDeliveryRegionsQuery>, ListDeliveryRegionsValidator>();
         services.AddScoped<IQueryHandler<GetBusinessDashboardQuery, BusinessDashboardReadModel>, GetBusinessDashboardQueryHandler>();
         services.AddScoped<IValidator<GetBusinessDashboardQuery>, GetBusinessDashboardQueryValidator>();
+        services.AddScoped<ICommandHandler<PublishReviewsCommand, ReviewSubmissionResult>, PublishReviewsHandler>();
+        services.AddScoped<ICommandHandler<ModerateReviewCommand>, ModerateReviewHandler>();
+        services.AddScoped<IQueryHandler<GetReviewProgressQuery, ReviewEligibility>, GetReviewProgressHandler>();
+        services.AddScoped<IQueryHandler<ListPublicReviewsQuery, PublicReviewPage>, ListPublicReviewsHandler>();
+        services.AddScoped<IQueryHandler<GetPublicReviewSummaryQuery, ReviewRatingSummary?>, GetPublicReviewSummaryHandler>();
+        services.AddScoped<IQueryHandler<ListAdminReviewsQuery, ReviewAdminPage>, ListAdminReviewsHandler>();
+        services.AddScoped<IValidator<PublishReviewsCommand>, PublishReviewsValidator>();
+        services.AddScoped<IValidator<ModerateReviewCommand>, ModerateReviewValidator>();
+        services.AddScoped<IValidator<ListPublicReviewsQuery>, ListPublicReviewsValidator>();
+        services.AddScoped<IValidator<ListAdminReviewsQuery>, ListAdminReviewsValidator>();
         return services;
     }
 }

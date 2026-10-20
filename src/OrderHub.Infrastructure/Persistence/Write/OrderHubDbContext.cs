@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using OrderHub.Infrastructure.Persistence.Write.Configurations;
 
 namespace OrderHub.Infrastructure.Persistence.Write;
 
@@ -32,6 +33,10 @@ public sealed class OrderHubDbContext(DbContextOptions<OrderHubDbContext> option
     public DbSet<OrderHub.Domain.Payments.Payment> Payments => Set<OrderHub.Domain.Payments.Payment>();
     public DbSet<OrderHub.Domain.Payments.PaymentIdempotency> PaymentIdempotencies => Set<OrderHub.Domain.Payments.PaymentIdempotency>();
     public DbSet<OrderHub.Domain.Ordering.PublicOrderRequest> PublicOrderRequests => Set<OrderHub.Domain.Ordering.PublicOrderRequest>();
+    public DbSet<OrderHub.Domain.Reviews.Review> Reviews => Set<OrderHub.Domain.Reviews.Review>();
+    public DbSet<OrderHub.Domain.Reviews.ReviewRequest> ReviewRequests => Set<OrderHub.Domain.Reviews.ReviewRequest>();
+    public DbSet<OrderHub.Domain.Reviews.ReviewModerationHistory> ReviewModerationHistories => Set<OrderHub.Domain.Reviews.ReviewModerationHistory>();
+    internal DbSet<ReviewRatingSummaryRecord> ReviewRatingSummaries => Set<ReviewRatingSummaryRecord>();
     internal DbSet<OutboxMessageRecord> OutboxMessages => Set<OutboxMessageRecord>();
     internal DbSet<OutboxConsumerReceiptRecord> OutboxConsumerReceipts => Set<OutboxConsumerReceiptRecord>();
     internal DbSet<NotificationTemplateRecord> NotificationTemplates => Set<NotificationTemplateRecord>();

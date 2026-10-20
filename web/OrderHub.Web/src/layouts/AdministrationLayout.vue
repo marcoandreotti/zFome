@@ -149,6 +149,14 @@ async function logout() {
           <q-item
             v-if="session.can('management')"
             clickable
+            to="/administration/reviews"
+            active-class="admin-nav-item--active"
+            class="admin-nav-link rounded-borders"
+            ><q-item-section>Avaliações</q-item-section></q-item
+          >
+          <q-item
+            v-if="session.can('management')"
+            clickable
             to="/administration"
             exact
             active-class="admin-nav-item--active"

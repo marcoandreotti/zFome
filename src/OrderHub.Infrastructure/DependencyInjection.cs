@@ -22,6 +22,7 @@ using OrderHub.Application.Identity.Authentication;
 using OrderHub.Application.Abstractions.Reporting;
 using Microsoft.Extensions.Hosting;
 using OrderHub.Application.Abstractions.Communications;
+using OrderHub.Application.Abstractions.Reviews;
 using OrderHub.Infrastructure.Communications;
 using Dapper;
 
@@ -79,6 +80,10 @@ public static class DependencyInjection
         });
         services.AddScoped<INotificationChannelSender>(provider => provider.GetRequiredService<MetaWhatsAppCloudSender>());
         services.AddScoped<IReadConnectionFactory, NpgsqlReadConnectionFactory>();
+        services.AddScoped<IReviewOrderGateway, ReviewOrderGateway>();
+        services.AddScoped<IReviewReadGateway, ReviewReadGateway>();
+        services.AddScoped<IReviewWriteRepository, ReviewRepository>();
+        services.AddScoped<IReviewTransaction, ReviewTransaction>();
         services.AddScoped<IEstablishmentRepository, EstablishmentRepository>();
         services.AddScoped<IEstablishmentReadGateway, EstablishmentReadGateway>();
         services.AddScoped<IPlatformScopeGateway, PlatformScopeGateway>();

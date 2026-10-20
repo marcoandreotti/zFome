@@ -160,6 +160,24 @@ public sealed class Customer : IEstablishmentScopedEntity
     public static string NormalizePhone(string phone)
     {
         var normalized = new string(phone.Where(char.IsDigit).ToArray());
+        // Remove only known Brazilian prefixes followed by a valid DDD and
+        // a 10/11 digit national number. This avoids mistaking DDD 55 or an
+        // unrelated 14 digit number for a country-code-prefixed phone.
+        if (normalized.StartsWith("550", StringComparison.Ordinal)
+            && IsBrazilianNationalNumber(normalized[3..]))
+        {
+            normalized = normalized[3..];
+        }
+        else if (normalized.StartsWith("55", StringComparison.Ordinal)
+            && IsBrazilianNationalNumber(normalized[2..]))
+        {
+            normalized = normalized[2..];
+        }
+        else if (normalized.StartsWith('0') && IsBrazilianNationalNumber(normalized[1..]))
+        {
+            normalized = normalized[1..];
+        }
+
         if (normalized.Length is < 8 or > 15)
         {
             throw new DomainException("Customer phone is invalid.");
@@ -167,6 +185,35 @@ public sealed class Customer : IEstablishmentScopedEntity
 
         return normalized;
     }
+
+    /// <summary>Retorna formas históricas equivalentes para localizar registros legados sem alterá-los.</summary>
+    public static string[] GetPhoneLookupCandidates(string normalizedPhone)
+    {
+        var canonical = NormalizePhone(normalizedPhone);
+        if (canonical.Length is not (10 or 11))
+        {
+            return [canonical];
+        }
+
+        return [canonical, $"55{canonical}", $"0{canonical}", $"550{canonical}"];
+    }
+
+    private static bool IsBrazilianNationalNumber(string value) =>
+        value.Length is 10 or 11
+        && BrazilianAreaCodes.Contains(value[..2], StringComparer.Ordinal);
+
+    private static readonly string[] BrazilianAreaCodes =
+    [
+        "11", "12", "13", "14", "15", "16", "17", "18", "19",
+        "21", "22", "24", "27", "28",
+        "31", "32", "33", "34", "35", "37", "38",
+        "41", "42", "43", "44", "45", "46", "47", "48", "49",
+        "51", "53", "54", "55",
+        "61", "62", "63", "64", "65", "66", "67", "68", "69",
+        "71", "73", "74", "75", "77", "79",
+        "81", "82", "83", "84", "85", "86", "87", "88", "89",
+        "91", "92", "93", "94", "95", "96", "97", "98", "99"
+    ];
 
     private static string? NormalizeEmail(string? email)
     {
