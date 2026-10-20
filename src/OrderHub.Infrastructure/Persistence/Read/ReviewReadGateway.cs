@@ -37,7 +37,8 @@ public sealed class ReviewReadGateway(IReadConnectionFactory connections) : IRev
         var filter = "tenant_id=@tenantId and establishment_id=@establishmentId and status='Published' and target_kind=@kind and target_id=@targetId";
         var parameters = new { tenantId, establishmentId, kind = productId.HasValue ? "Product" : "Establishment", targetId = productId ?? establishmentId, offset = (page - 1) * pageSize, pageSize };
         var total = await db.ExecuteScalarAsync<long>(new CommandDefinition($"select count(*) from reviews.review where {filter}", parameters, cancellationToken: cancellationToken));
-        var items = (await db.QueryAsync<ReviewPublicItem>(new CommandDefinition($"select rating Rating, comment Comment, created_at CreatedAt from reviews.review where {filter} order by created_at desc, id desc offset @offset limit @pageSize", parameters, cancellationToken: cancellationToken))).ToArray();
+        var rows = await db.QueryAsync<PublicReviewRow>(new CommandDefinition($"select rating Rating, comment Comment, created_at CreatedAt from reviews.review where {filter} order by created_at desc, id desc offset @offset limit @pageSize", parameters, cancellationToken: cancellationToken));
+        var items = rows.Select(row => new ReviewPublicItem(row.Rating, row.Comment, ToUtcOffset(row.CreatedAt))).ToArray();
         return new(total, items);
     }
 
@@ -70,12 +71,15 @@ public sealed class ReviewReadGateway(IReadConnectionFactory connections) : IRev
         const string filter = "r.tenant_id=@tenantId and r.establishment_id=@establishmentId and (@rating is null or r.rating=@rating) and (@status is null or r.status=@status) and (@from is null or r.created_at>=@from) and (@to is null or r.created_at<@to)";
         var p = new { tenantId, establishmentId, rating, status = status?.ToString(), from, to, offset = (page - 1) * pageSize, pageSize };
         var total = await db.ExecuteScalarAsync<long>(new CommandDefinition($"select count(*) from reviews.review r where {filter}", p, cancellationToken: cancellationToken));
-        var items = (await db.QueryAsync<ReviewAdminItem>(new CommandDefinition($"""
+        var rows = await db.QueryAsync<AdminReviewRow>(new CommandDefinition($"""
             select r.id Id, case when r.target_kind='Product' then r.target_id else null end ProductId, p.name ProductName,
                 r.rating Rating, r.comment Comment, r.status Status, r.moderation_reason ModerationReason, r.created_at CreatedAt, r.updated_at UpdatedAt
             from reviews.review r left join catalog.product p on p.tenant_id=r.tenant_id and p.establishment_id=r.establishment_id and p.id=r.target_id and r.target_kind='Product'
             where {filter} order by r.created_at desc,r.id desc offset @offset limit @pageSize
-            """, p, cancellationToken: cancellationToken))).ToArray();
+            """, p, cancellationToken: cancellationToken));
+        var items = rows.Select(row => new ReviewAdminItem(row.Id, row.ProductId, row.ProductName, row.Rating,
+            row.Comment, Enum.Parse<ReviewStatus>(row.Status), row.ModerationReason,
+            ToUtcOffset(row.CreatedAt), ToUtcOffset(row.UpdatedAt))).ToArray();
         return new(total, items);
     }
 
@@ -89,5 +93,11 @@ public sealed class ReviewReadGateway(IReadConnectionFactory connections) : IRev
         return new(establishmentReviewed, pending, order.Products.Select(x => new ReviewProgress(x.ProductId, x.Name, productIds.Contains(x.ProductId))).ToArray());
     }
 
+    private static DateTimeOffset ToUtcOffset(DateTime value) =>
+        new(DateTime.SpecifyKind(value, DateTimeKind.Utc));
+
+    private sealed record PublicReviewRow(int Rating, string? Comment, DateTime CreatedAt);
+    private sealed record AdminReviewRow(Guid Id, Guid? ProductId, string? ProductName, int Rating, string? Comment,
+        string Status, string? ModerationReason, DateTime CreatedAt, DateTime UpdatedAt);
     private sealed record ReviewedTarget(string TargetKind, Guid TargetId, string Status);
 }

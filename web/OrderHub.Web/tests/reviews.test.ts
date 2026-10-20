@@ -114,6 +114,18 @@ describe('public review form', () => {
 })
 
 describe('reviews moderation queue', () => {
+  it('renders a pending review and sends its approval', async () => {
+    const wrapper = mount(ReviewsPage, { global: { stubs, directives: { 'close-popup': {} } } })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Pendente')
+    await wrapper.findAll('button').find(button => button.text() === 'Aprovar e publicar')!.trigger('click')
+    await flushPromises()
+
+    expect(reviewsClient.approve).toHaveBeenCalledWith('unit-1', 'review-1')
+    wrapper.unmount()
+  })
+
   it('sends a pending rejection to the reject endpoint with its reason', async () => {
     const wrapper = mount(ReviewsPage, { global: { stubs, directives: { 'close-popup': {} } } })
     await flushPromises()

@@ -21,7 +21,7 @@ internal static class ReviewEndpoints
 
         var admin = endpoints.MapGroup("/api/admin/establishments/{establishmentId:guid}/reviews")
             .RequireAuthorization(AdministrativePolicies.Management).WithTags("Reviews");
-        admin.MapGet("", AdminListAsync).Produces<ReviewAdminPage>().ProducesProblem(403);
+        admin.MapGet("", AdminListAsync).Produces<ReviewAdminPageResponse>().ProducesProblem(403);
         admin.MapPost("/{reviewId:guid}/approve", ApproveAsync).Produces(StatusCodes.Status204NoContent).ProducesProblem(403).ProducesProblem(404);
         admin.MapPost("/{reviewId:guid}/reject", RejectAsync).Produces(StatusCodes.Status204NoContent).ProducesValidationProblem().ProducesProblem(403).ProducesProblem(404);
         admin.MapPost("/{reviewId:guid}/hide", HideAsync).Produces(StatusCodes.Status204NoContent).ProducesValidationProblem().ProducesProblem(403).ProducesProblem(404);
@@ -65,7 +65,9 @@ internal static class ReviewEndpoints
         var actor = await scope.ResolveAsync(establishmentId, ct);
         var result = await dispatcher.DispatchAsync<ListAdminReviewsQuery, ReviewAdminPage>(
             new(actor.TenantId, actor.EstablishmentId, rating, status, from, to, page ?? 1, pageSize ?? 20), ct);
-        return Results.Ok(result);
+        return Results.Ok(new ReviewAdminPageResponse(result.Total, result.Items.Select(item =>
+            new ReviewAdminItemResponse(item.Id, item.ProductId, item.ProductName, item.Rating, item.Comment,
+                item.Status.ToString(), item.ModerationReason, item.CreatedAt, item.UpdatedAt)).ToArray()));
     }
 
     private static Task<IResult> HideAsync(Guid establishmentId, Guid reviewId, ModerateReviewRequest request,
