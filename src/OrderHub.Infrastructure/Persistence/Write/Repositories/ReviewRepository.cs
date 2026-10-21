@@ -22,6 +22,28 @@ public sealed class ReviewRepository(OrderHubDbContext context) : IReviewWriteRe
     public async Task ApplyRatingDeltaAsync(Guid tenantId, Guid establishmentId, ReviewTargetKind targetKind, Guid targetId, int rating, int delta, DateTimeOffset now, CancellationToken cancellationToken)
     {
         _ = rating switch { 1 => true, 2 => true, 3 => true, 4 => true, 5 => true, _ => throw new ArgumentOutOfRangeException(nameof(rating)) };
+        if (delta < 0)
+        {
+            var removed = await context.Database.ExecuteSqlInterpolatedAsync($"""
+                update reviews.rating_summary
+                set count = count - 1,
+                    rating_sum = rating_sum - {rating},
+                    rating_1_count = rating_1_count - {(rating == 1 ? 1 : 0)},
+                    rating_2_count = rating_2_count - {(rating == 2 ? 1 : 0)},
+                    rating_3_count = rating_3_count - {(rating == 3 ? 1 : 0)},
+                    rating_4_count = rating_4_count - {(rating == 4 ? 1 : 0)},
+                    rating_5_count = rating_5_count - {(rating == 5 ? 1 : 0)},
+                    updated_at = {now}
+                where tenant_id = {tenantId}
+                  and establishment_id = {establishmentId}
+                  and target_kind = {targetKind.ToString()}
+                  and target_id = {targetId}
+                  and count > 0
+                """, cancellationToken);
+            if (removed != 1) throw new InvalidOperationException("Rating summary counters would become negative.");
+            return;
+        }
+
         var affected = await context.Database.ExecuteSqlInterpolatedAsync($"""
             insert into reviews.rating_summary (tenant_id, establishment_id, target_kind, target_id, count, rating_sum,
                 rating_1_count, rating_2_count, rating_3_count, rating_4_count, rating_5_count, updated_at)

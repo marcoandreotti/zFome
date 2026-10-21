@@ -6,6 +6,7 @@ using OrderHub.Domain.Tenancy;
 using OrderHub.Infrastructure.Persistence;
 using OrderHub.Infrastructure.Persistence.Read;
 using OrderHub.Infrastructure.Persistence.Write;
+using OrderHub.Infrastructure.Persistence.Write.Repositories;
 using Testcontainers.PostgreSql;
 
 namespace OrderHub.Integration.Tests;
@@ -71,6 +72,50 @@ public sealed class ReviewReadGatewayTests : IAsyncLifetime
         Assert.Equal("Excellent service", publicReview.Comment);
         Assert.Equal(createdAt, publicReview.CreatedAt);
     }
+
+    [Fact]
+    public async Task Removing_a_published_rating_updates_summary_without_negative_insert()
+    {
+        var options = new DbContextOptionsBuilder<OrderHubDbContext>()
+            .UseNpgsql(database.GetConnectionString()).Options;
+        var now = new DateTimeOffset(2026, 10, 20, 18, 0, 0, TimeSpan.Zero);
+        var tenantId = Guid.NewGuid();
+        var establishmentId = Guid.NewGuid();
+
+        await using (var context = new OrderHubDbContext(options))
+        {
+            await context.Database.EnsureCreatedAsync();
+            var tenant = Tenant.Create("Group", now);
+            var establishment = Establishment.Create(tenant.Id, "Unit", new Slug("unit"), now);
+            tenantId = tenant.Id;
+            establishmentId = establishment.Id;
+            context.AddRange(tenant, establishment);
+            await context.SaveChangesAsync();
+            await context.Database.ExecuteSqlInterpolatedAsync($"""
+                insert into reviews.rating_summary
+                    (tenant_id, establishment_id, target_kind, target_id, count, rating_sum,
+                     rating_1_count, rating_2_count, rating_3_count, rating_4_count, rating_5_count, updated_at)
+                values ({tenantId}, {establishmentId}, {"Establishment"}, {establishmentId}, 1, 5, 0, 0, 0, 0, 1, {now})
+                """);
+        }
+
+        await using (var context = new OrderHubDbContext(options))
+        {
+            var repository = new ReviewRepository(context);
+            await repository.ApplyRatingDeltaAsync(tenantId, establishmentId, ReviewTargetKind.Establishment,
+                establishmentId, 5, -1, now.AddMinutes(1), CancellationToken.None);
+            var values = await context.Database.SqlQuery<SummaryCounters>($"""
+                select count as "Count", rating_sum as "RatingSum", rating_5_count as "Rating5Count"
+                from reviews.rating_summary
+                where tenant_id = {tenantId} and establishment_id = {establishmentId}
+                """).SingleAsync();
+            Assert.Equal(0, values.Count);
+            Assert.Equal(0, values.RatingSum);
+            Assert.Equal(0, values.Rating5Count);
+        }
+    }
+
+    private sealed record SummaryCounters(long Count, long RatingSum, long Rating5Count);
 
     private static Order CreateOrder(Guid tenantId, Guid establishmentId, DateTimeOffset now) =>
         Order.Create(tenantId, establishmentId, OrderServiceType.Pickup,
