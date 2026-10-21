@@ -1,22 +1,22 @@
-# Design System web do OrderHub
+# Design System web do zFome
 
 ## Propósito
 
 Este documento é a fonte oficial das decisões visuais e dos padrões de componentes da aplicação web. Ele orienta implementação e revisão, sem substituir as specs funcionais em `openspec/specs/`.
 
-O objetivo é permitir que qualquer pessoa ou agente descubra como o OrderHub já resolve uma necessidade antes de criar uma solução nova.
+O objetivo é permitir que qualquer pessoa ou agente descubra como o zFome já resolve uma necessidade antes de criar uma solução nova.
 
 ## Fontes oficiais
 
 As fontes devem ser consultadas em conjunto:
 
 - Este documento define propósito, critérios de uso e padrões visuais.
-- `web/OrderHub.Web/src/themes/_tokens.scss` contém os tokens implementados.
-- `web/OrderHub.Web/src/themes/tenant-theme.ts` e `web/OrderHub.Web/src/modules/public-ordering/theme.ts` contêm a aplicação programática de tema.
-- `web/OrderHub.Web/src/css/app.scss` contém estilos globais ainda vigentes.
-- `web/OrderHub.Web/src/components/` contém componentes compartilhados implementados.
-- `web/OrderHub.Web/src/layouts/` contém os shells oficiais das superfícies.
-- Componentes reutilizáveis de feature permanecem em `web/OrderHub.Web/src/modules/<module>/`.
+- `web/ZFome.Web/src/themes/_tokens.scss` contém os tokens implementados.
+- `web/ZFome.Web/src/themes/tenant-theme.ts` e `web/ZFome.Web/src/modules/public-ordering/theme.ts` contêm a aplicação programática de tema.
+- `web/ZFome.Web/src/css/app.scss` contém estilos globais ainda vigentes.
+- `web/ZFome.Web/src/components/` contém componentes compartilhados implementados.
+- `web/ZFome.Web/src/layouts/` contém os shells oficiais das superfícies.
+- Componentes reutilizáveis de feature permanecem em `web/ZFome.Web/src/modules/<module>/`.
 - Specs de frontend em `openspec/specs/` definem comportamento, acessibilidade e resultados obrigatórios.
 
 Se documentação e implementação divergirem, não escolher silenciosamente. Confirmar se o código representa dívida, se o documento está desatualizado ou se a mudança exige decisão explícita.
@@ -125,19 +125,19 @@ Não criar um layout genérico para unificar superfícies com propósitos difere
 
 `_tokens.scss` define atualmente:
 
-- marca: `--oh-brand-primary`, `--oh-brand-primary-hover`,
-  `--oh-brand-primary-text`, `--oh-brand-on-primary`, `--oh-brand-soft`,
-  `--oh-brand-secondary` e `--oh-brand-accent`;
-- navegação: `--oh-navigation-background`, `--oh-navigation-text` e
-  `--oh-navigation-muted`;
-- superfícies: `--oh-surface-page` e `--oh-surface-raised`;
-- texto: `--oh-text-primary` e `--oh-text-muted`;
-- borda: `--oh-border-subtle`;
-- foco: `--oh-focus-ring`;
-- estados: `--oh-status-success`, `--oh-status-success-text`,
-  `--oh-status-warning`, `--oh-status-warning-text`, `--oh-status-danger`,
-  `--oh-status-urgency`, `--oh-status-info`, `--oh-status-confirmed`,
-  `--oh-status-preparing`, `--oh-status-ready` e `--oh-status-cancelled`;
+- marca: `--zf-brand-primary`, `--zf-brand-primary-hover`,
+  `--zf-brand-primary-text`, `--zf-brand-on-primary`, `--zf-brand-soft`,
+  `--zf-brand-secondary` e `--zf-brand-accent`;
+- navegação: `--zf-navigation-background`, `--zf-navigation-text` e
+  `--zf-navigation-muted`;
+- superfícies: `--zf-surface-page` e `--zf-surface-raised`;
+- texto: `--zf-text-primary` e `--zf-text-muted`;
+- borda: `--zf-border-subtle`;
+- foco: `--zf-focus-ring`;
+- estados: `--zf-status-success`, `--zf-status-success-text`,
+  `--zf-status-warning`, `--zf-status-warning-text`, `--zf-status-danger`,
+  `--zf-status-urgency`, `--zf-status-info`, `--zf-status-confirmed`,
+  `--zf-status-preparing`, `--zf-status-ready` e `--zf-status-cancelled`;
 - raio-base;
 - família tipográfica.
 
@@ -162,8 +162,8 @@ estados do pedido independentemente da cor de marca: confirmado em azul/índigo,
 preparo em âmbar, pronto/concluído em verde e cancelado/rejeitado em vermelho.
 
 Texto dentro de CTAs laranja usa grafite escuro. Labels sobre tons warning/success
-usam variantes textuais mais escuras (`--oh-status-warning-text` e
-`--oh-status-success-text`), enquanto os valores semânticos base podem ser usados
+usam variantes textuais mais escuras (`--zf-status-warning-text` e
+`--zf-status-success-text`), enquanto os valores semânticos base podem ser usados
 em fundos suaves, bordas ou indicadores. Cor nunca é o único sinal do estado.
 
 Esses tokens são oficiais enquanto existirem no código, mas formam apenas a fundação inicial.
@@ -174,14 +174,14 @@ Os estados de urgência e erro devem ser acompanhados por texto ou ícone; a cor
 
 A aplicação oferece três preferências: **Sistema**, **Claro** e **Escuro**. Sistema é o
 padrão inicial e acompanha `prefers-color-scheme`; Claro e Escuro são escolhas explícitas.
-A preferência fica no armazenamento local do navegador (`orderhub.appearance-mode`) e é
+A preferência fica no armazenamento local do navegador (`zfome.appearance-mode`) e é
 sincronizada entre abas abertas no mesmo navegador. Ela não depende da conta nem é
 sincronizada entre dispositivos.
 
 `src/themes/_tokens.scss` define os mesmos tokens semânticos nas duas aparências. A raiz
 `data-theme` escolhe a paleta, enquanto o boot `appearance` e o plugin Dark do Quasar
 mantêm páginas, controles e overlays na mesma escolha. Novos estilos devem consumir os
-tokens (`--oh-surface-*`, `--oh-text-*`, `--oh-border-*`, `--oh-status-*`) em vez de
+tokens (`--zf-surface-*`, `--zf-text-*`, `--zf-border-*`, `--zf-status-*`) em vez de
 fixar branco, preto ou cinzas de uma única aparência.
 
 O modo escuro preserva o grafite e o laranja da marca, mas usa superfícies elevadas,
@@ -192,7 +192,7 @@ globais nem as outras superfícies.
 
 ### Compatibilidade
 
-Os aliases legados `--oh-color-*` foram removidos depois da migração dos últimos
+Os aliases legados `--zf-color-*` foram removidos depois da migração dos últimos
 consumidores e da verificação das quatro superfícies. Todo estilo novo usa diretamente
 os tokens semânticos implementados. Antes de remover ou renomear um token oficial,
 pesquisar todos os consumidores e verificar Public, Administration, Operations, KDS e
@@ -230,7 +230,7 @@ As categorias abaixo são candidatas, não tokens já implementados:
 A superfície Administration utiliza um acento violeta de apoio para navegação selecionada,
 identificação do contexto gerencial e gráficos do dashboard, inspirado em interfaces de
 analytics. Ele é definido no escopo `[data-surface='administration']` como
-`--oh-admin-accent`, `--oh-admin-accent-soft` e `--oh-admin-accent-text`, com variantes
+`--zf-admin-accent`, `--zf-admin-accent-soft` e `--zf-admin-accent-text`, com variantes
 para tema escuro. O acento não substitui o laranja de marca nos CTAs nem altera Public,
 Operations, KDS ou Platform. Superfícies administrativas seguem claras e elevadas no
 tema claro, com fundo lavanda muito suave, cartões brancos e contornos discretos.
@@ -271,14 +271,14 @@ Não promover componentes automaticamente. Também não aumentar indefinidamente
 
 #### ProblemBanner
 
-- Caminho: `web/OrderHub.Web/src/components/ProblemBanner.vue`.
+- Caminho: `web/ZFome.Web/src/components/ProblemBanner.vue`.
 - Propósito: apresentar erros HTTP e ProblemDetails de forma consistente, mantendo espaço para uma ação de recuperação.
 - Usar quando: uma página, painel ou operação precisa comunicar falha recuperável ou erro conhecido da API.
 - Não usar quando: o erro pertence exclusivamente a um campo de formulário ou uma mensagem transitória de sucesso é suficiente.
 
 #### AppearanceControl
 
-- Caminho: `web/OrderHub.Web/src/components/AppearanceControl.vue`.
+- Caminho: `web/ZFome.Web/src/components/AppearanceControl.vue`.
 - Classificação: Global; controle único de preferência visual usado pelos shells oficiais.
 - Propósito: escolher Sistema, Claro ou Escuro e apresentar a opção atual.
 - Usar uma vez no cabeçalho de Public, Administration, Operations/KDS e Platform.

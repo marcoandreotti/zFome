@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Estabelece os requisitos verificáveis da fundação técnica do OrderHub para que cada fase preserve isolamento Multi-Tenant, separação CQRS, independência do domínio e capacidade de execução e teste incremental.
+Estabelece os requisitos verificáveis da fundação técnica do zFome para que cada fase preserve isolamento Multi-Tenant, separação CQRS, independência do domínio e capacidade de execução e teste incremental.
 
 ## Requirements
 

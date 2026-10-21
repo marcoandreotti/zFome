@@ -1,6 +1,6 @@
 ## Purpose
 
-Oferece atendimento conversacional sobre o OrderHub mantendo preços, disponibilidade, autorização e confirmação sob controle dos serviços determinísticos.
+Oferece atendimento conversacional sobre o zFome mantendo preços, disponibilidade, autorização e confirmação sob controle dos serviços determinísticos.
 
 ## ADDED Requirements
 

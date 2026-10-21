@@ -28,7 +28,7 @@ A rota `/_test/tenant` existe somente no ambiente `Testing` para comprovar a fal
 
 ## Verificações executadas
 
-- `dotnet build OrderHub.sln --no-restore`: sucesso, 0 erros e 0 warnings.
+- `dotnet build ZFome.sln --no-restore`: sucesso, 0 erros e 0 warnings.
 - Testes Application: 5 aprovados.
 - Testes Architecture: 6 aprovados.
 - Testes Integration/PostgreSQL: 4 aprovados.

@@ -51,13 +51,13 @@ Quasar também habilita WebSocket para esse caminho.
 
 ## Telemetria
 
-O meter `OrderHub.Api.RealtimeOrders` publica:
+O meter `ZFome.Api.RealtimeOrders` publica:
 
-- `orderhub.realtime.connections`;
-- `orderhub.realtime.subscriptions`;
-- `orderhub.realtime.events.published`;
-- `orderhub.realtime.deliveries.denied`;
-- `orderhub.realtime.failures`.
+- `zfome.realtime.connections`;
+- `zfome.realtime.subscriptions`;
+- `zfome.realtime.events.published`;
+- `zfome.realtime.deliveries.denied`;
+- `zfome.realtime.failures`.
 
 Logs estruturados registram conexão, inscrição, revogação e falha de publicação,
 sem incluir conteúdo do pedido ou credenciais.

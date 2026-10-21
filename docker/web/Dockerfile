@@ -1,8 +1,8 @@
 FROM node:22.22-alpine AS build
 WORKDIR /app
-COPY web/OrderHub.Web/package*.json ./
+COPY web/ZFome.Web/package*.json ./
 RUN npm ci --ignore-scripts
-COPY web/OrderHub.Web/ ./
+COPY web/ZFome.Web/ ./
 RUN npm run postinstall
 ARG VITE_API_BASE_URL=http://localhost:8080
 ARG VITE_REALTIME_BASE_URL

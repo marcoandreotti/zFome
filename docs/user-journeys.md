@@ -1,4 +1,4 @@
-# Guia rápido de uso do OrderHub
+# Guia rápido de uso do zFome
 
 Este guia mostra onde começar e quais passos seguir nas jornadas que já estão disponíveis. As telas e ações exibidas podem variar conforme a unidade ativa, a disponibilidade configurada e as permissões da conta.
 
@@ -60,7 +60,7 @@ Salve cada etapa; é possível continuar depois. Tema e mesas são opcionais. Pa
 | Configurar formas de pagamento | Administração → Formas de pagamento (`/administration/payment-methods`) | Definir as formas que podem ser escolhidas no pedido. |
 | Configurar mensagens | Administração → Notificações (`/administration/communications`) | Gerenciar templates, consentimentos e histórico de envio. |
 
-As opções dependem das capacidades atribuídas à conta. A configuração de uma forma de pagamento não significa que o OrderHub processe pagamento online; essa jornada depende do tipo de forma ativa na unidade.
+As opções dependem das capacidades atribuídas à conta. A configuração de uma forma de pagamento não significa que o zFome processe pagamento online; essa jornada depende do tipo de forma ativa na unidade.
 
 ## Atender pedidos (equipe de operação)
 

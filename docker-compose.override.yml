@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: web/OrderHub.Web/Dockerfile.dev
+      dockerfile: web/ZFome.Web/Dockerfile.dev
     command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
     environment:
       API_PROXY_TARGET: http://api:8080
@@ -10,11 +10,11 @@ services:
     ports: !override
       - "${WEB_PORT:-9000}:9000"
     volumes:
-      - ./web/OrderHub.Web:/app
-      - orderhub-web-node-modules:/app/node_modules
+      - ./web/ZFome.Web:/app
+      - zfome-web-node-modules:/app/node_modules
     depends_on:
       api:
         condition: service_started
 
 volumes:
-  orderhub-web-node-modules:
+  zfome-web-node-modules:

@@ -1,6 +1,6 @@
 # Outbox transacional
 
-O publisher (`IOutboxMessageStager`) deve receber mensagens depois de validar o caso de uso e antes do `SaveChangesAsync` da mesma unidade de trabalho. Ele apenas adiciona a mensagem ao `OrderHubDbContext`; a transação de negócio grava aggregate e outbox juntos. Não chame o fornecedor externo dentro do command handler.
+O publisher (`IOutboxMessageStager`) deve receber mensagens depois de validar o caso de uso e antes do `SaveChangesAsync` da mesma unidade de trabalho. Ele apenas adiciona a mensagem ao `zFomeDbContext`; a transação de negócio grava aggregate e outbox juntos. Não chame o fornecedor externo dentro do command handler.
 
 Consumidores implementam `IOutboxMessageHandler` para um `MessageType` e `SchemaVersion` específicos, e usam um `ConsumerName` estável. O worker grava o recibo do consumidor, os efeitos locais e o acknowledgement na mesma transação PostgreSQL. Um handler que chama um serviço externo também deve enviar `IdempotencyKey` ao fornecedor, pois uma falha de rede pode deixar incerto se o efeito externo ocorreu.
 

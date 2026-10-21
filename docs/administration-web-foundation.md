@@ -13,19 +13,19 @@
 
 ## Sessão e isolamento
 
-Pinia mantém o contexto apenas em memória. `sessionStorage` guarda somente `oh-unit`, revalidado contra a lista retornada pelo servidor. Cookies de acesso/renovação não são lidos pelo JavaScript. O cookie CSRF é enviado no cabeçalho correspondente.
+Pinia mantém o contexto apenas em memória. `sessionStorage` guarda somente `zf-unit`, revalidado contra a lista retornada pelo servidor. Cookies de acesso/renovação não são lidos pelo JavaScript. O cookie CSRF é enviado no cabeçalho correspondente.
 
 Axios serializa renovação e tenta novamente apenas uma vez. Uma revisão de contexto invalida respostas que chegaram depois da troca de unidade ou do logout. O conteúdo administrativo é remontado na troca de revisão. A API continua responsável pela autorização em todas as operações.
 
 ## Execução local
 
-Em `web/OrderHub.Web`, executar `npm run dev`. O Quasar usa a porta 9000 e encaminha `/api` para `http://localhost:8080`; `API_PROXY_TARGET` altera esse destino. Em produção, servir web e `/api` na mesma origem, com HTTPS e fallback de rotas da SPA. Não configurar origem cruzada sem revisar CORS, cookies e CSRF.
+Em `web/ZFome.Web`, executar `npm run dev`. O Quasar usa a porta 9000 e encaminha `/api` para `http://localhost:8080`; `API_PROXY_TARGET` altera esse destino. Em produção, servir web e `/api` na mesma origem, com HTTPS e fallback de rotas da SPA. Não configurar origem cruzada sem revisar CORS, cookies e CSRF.
 
 ## Verificação final — 2026-09-04
 
 - `npm test`: 44 testes aprovados em nove arquivos, incluindo estados de erro/recuperação, componentes, sessão, unidade, navegação e restrições de Owner.
-- `dotnet test OrderHub.sln --no-restore`: 227 testes aprovados (60 Domain, 64 Application, 7 Architecture e 96 Integration/API), sem falhas ou ignorados. As suítes de API exercitam chamadas diretas negadas, isolamento e persistência; os testes visuais não substituem essas verificações.
-- `dotnet build OrderHub.sln --no-restore`: zero erros e warnings.
+- `dotnet test ZFome.sln --no-restore`: 227 testes aprovados (60 Domain, 64 Application, 7 Architecture e 96 Integration/API), sem falhas ou ignorados. As suítes de API exercitam chamadas diretas negadas, isolamento e persistência; os testes visuais não substituem essas verificações.
+- `dotnet build ZFome.sln --no-restore`: zero erros e warnings.
 - `npm run typecheck` e `npm run build`: aprovados.
 - Formatação Prettier dos arquivos frontend da mudança e `dotnet format whitespace` dos arquivos C# alterados verificadas.
 - `scripts/check-administration-browser.mjs`: Chrome com aplicação compilada e respostas HTTP simuladas, em 1440×1024 e 768×1024. Verifica ausência de overflow da página, abertura por teclado, foco dentro dos diálogos, fechamento por Escape, foco ao navegar, troca de unidade, restrições de Admin/cozinha/atendimento e preservação de formulário em conflito. Mede contraste mínimo de 4,5:1 nos botões principais e alertas.

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafc">
+    <title>zFome</title>
+    <script>
+      (() => {
+        const root = document.documentElement
+        const applyInitialTheme = (mode) => {
+          root.dataset.theme = mode
+          document.querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', mode === 'dark' ? '#111827' : '#f8fafc')
+        }
+        try {
+          const mode = localStorage.getItem('zfome.appearance-mode')
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          applyInitialTheme(mode === 'light' || mode === 'dark'
+            ? mode
+            : prefersDark ? 'dark' : 'light')
+        } catch {
+          applyInitialTheme(window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light')
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <!-- quasar:entry-point -->
+  </body>
+</html>

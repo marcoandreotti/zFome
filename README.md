@@ -1,4 +1,4 @@
-# OrderHub
+# zFome
 
 Documentação operacional: [notificações de pedidos em tempo real](docs/realtime-order-notifications.md).
 
@@ -13,10 +13,10 @@ Fundação do monólito modular SaaS Multi-Tenant para gestão de pedidos de est
 ## Backend
 
 ```powershell
-dotnet restore OrderHub.sln
-dotnet build OrderHub.sln --no-restore
-dotnet test OrderHub.sln --no-build
-dotnet run --project src/OrderHub.Api
+dotnet restore ZFome.sln
+dotnet build ZFome.sln --no-restore
+dotnet test ZFome.sln --no-build
+dotnet run --project src/ZFome.Api
 ```
 
 A API expõe liveness em `GET /health` e readiness do PostgreSQL em `GET /health/ready`.
@@ -24,7 +24,7 @@ A API expõe liveness em `GET /health` e readiness do PostgreSQL em `GET /health
 ## Frontend
 
 ```powershell
-cd web/OrderHub.Web
+cd web/ZFome.Web
 npm install
 npm run dev
 ```
@@ -52,7 +52,7 @@ docker compose logs migrations
 Corrija a migration ou a configuração indicada no log e inicie novamente com
 `docker compose up --build`. A API só inicia depois que o serviço `migrations`
 terminar com sucesso. Para executar migrations manualmente fora do Compose,
-consulte [as instruções do projeto de migrations](src/OrderHub.Infrastructure/Persistence/Write/Migrations/README.md).
+consulte [as instruções do projeto de migrations](src/ZFome.Infrastructure/Persistence/Write/Migrations/README.md).
 
 Serviços locais:
 
@@ -61,7 +61,7 @@ Serviços locais:
 - PostgreSQL: `localhost:5432`
 
 O `docker-compose.override.yml` é carregado automaticamente no desenvolvimento:
-ele monta `web/OrderHub.Web` no container e inicia `quasar dev`, refletindo
+ele monta `web/ZFome.Web` no container e inicia `quasar dev`, refletindo
 alterações de Vue/TypeScript sem reconstruir a imagem. Em hosts Windows, o watcher
 usa polling para detectar alterações nos arquivos montados. Para executar o
 frontend estático de produção definido no `docker-compose.yml`, use explicitamente:
@@ -72,20 +72,20 @@ docker compose -f docker-compose.yml up --build
 
 ## Arquitetura
 
-- `OrderHub.Domain`: modelo e regras de domínio, sem dependências externas.
-- `OrderHub.Application`: Commands, Queries, handlers e portas.
-- `OrderHub.Infrastructure`: EF Core, Dapper e adapters técnicos.
-- `OrderHub.Contracts`: contratos externos explícitos.
-- `OrderHub.Api`: composition root e borda HTTP.
+- `ZFome.Domain`: modelo e regras de domínio, sem dependências externas.
+- `ZFome.Application`: Commands, Queries, handlers e portas.
+- `ZFome.Infrastructure`: EF Core, Dapper e adapters técnicos.
+- `ZFome.Contracts`: contratos externos explícitos.
+- `ZFome.Api`: composition root e borda HTTP.
 
 EF Core atende escrita e migrations; Dapper atende leitura. MediatR e AutoMapper são proibidos. Consulte `openspec/architecture.md`, `openspec/conventions.md` e os ADRs em `openspec/decisions/`.
 
 ## Cérebro do projeto
 
-O conhecimento de produto, domínio, arquitetura, fluxos e orientações para agentes do OrderHub está organizado no cofre Obsidian **Cérebro do Arquiteto**, no repositório `Obsidian`, em `Arquiteturando/Projetos/OrderHub/`. Quando o cofre estiver disponível, desenvolvedores e agentes devem consultá-lo no início de uma tarefa para entender o contexto e navegar até as notas relacionadas. Comece por `00 - Home/Home.md` ou `00 - Home/Mapa do Projeto.md`; a nota `Arquiteturando/Bússola de desenvolvimento para agentes.md` reúne as orientações gerais para agentes.
+O conhecimento de produto, domínio, arquitetura, fluxos e orientações para agentes do zFome está organizado no cofre Obsidian **Cérebro do Arquiteto**, no repositório `Obsidian`, em `Arquiteturando/Projetos/zFome/`. Quando o cofre estiver disponível, desenvolvedores e agentes devem consultá-lo no início de uma tarefa para entender o contexto e navegar até as notas relacionadas. Comece por `00 - Home/Home.md` ou `00 - Home/Mapa do Projeto.md`; a nota `Arquiteturando/Bússola de desenvolvimento para agentes.md` reúne as orientações gerais para agentes.
 
 O Cérebro e a memória disponível ajudam a compreender o projeto e seu histórico. Para requisitos vigentes e decisões normativas, confirme sempre no `AGENTS.md`, nas specs e changes do OpenSpec, nos ADRs, no Design System e no código atual, conforme aplicável. Se houver divergência, prevalecem essas fontes oficiais. As notas podem ficar desatualizadas; confirme informações voláteis no repositório.
 
 ## Configuração
 
-Configurações não sensíveis ficam em `appsettings*.json`. Valores por ambiente usam variáveis com separador `__`, por exemplo `ConnectionStrings__OrderHub`. Senhas reais, tokens e arquivos `.env` não devem ser versionados.
+Configurações não sensíveis ficam em `appsettings*.json`. Valores por ambiente usam variáveis com separador `__`, por exemplo `ConnectionStrings__zFome`. Senhas reais, tokens e arquivos `.env` não devem ser versionados.

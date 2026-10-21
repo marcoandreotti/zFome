@@ -6,14 +6,14 @@
 
 ## Reuso identificado
 
-- `web/OrderHub.Web`: Vue, Quasar e TypeScript; Axios e Pinia já declarados. Não introduzir outro framework de componentes ou estado.
+- `web/ZFome.Web`: Vue, Quasar e TypeScript; Axios e Pinia já declarados. Não introduzir outro framework de componentes ou estado.
 - `src/layouts/AdministrationLayout.vue`: shell administrativo inicial.
 - `src/router/routes.ts`: rotas lazy existentes; preservar página de fundação.
 - `src/boot/http.ts`: cliente Axios e contrato de ProblemDetails existentes; ainda sem cookies, renovação serializada ou store de sessão.
 - `src/themes/_tokens.scss`, `src/themes/tenant-theme.ts` e `src/css/app.scss`: tema e tokens existentes.
-- `OrderHub.Application/Identity/AdministrativePolicies.cs`: mapa autoritativo de capacidades; administração de usuários não deve ser concedida a todo papel de gestão indistintamente.
-- `OrderHub.Api/Authentication/AuthenticationEndpoints.cs`: início/conclusão de MFA, renovação, logout, troca de senha e gestão de identidades de plataforma.
-- `OrderHub.Api/Administration/AdministrationEndpoints.cs`: clientes, pedidos, cupons e pagamentos por estabelecimento.
+- `ZFome.Application/Identity/AdministrativePolicies.cs`: mapa autoritativo de capacidades; administração de usuários não deve ser concedida a todo papel de gestão indistintamente.
+- `ZFome.Api/Authentication/AuthenticationEndpoints.cs`: início/conclusão de MFA, renovação, logout, troca de senha e gestão de identidades de plataforma.
+- `ZFome.Api/Administration/AdministrationEndpoints.cs`: clientes, pedidos, cupons e pagamentos por estabelecimento.
 
 ## Lacunas identificadas no levantamento inicial
 

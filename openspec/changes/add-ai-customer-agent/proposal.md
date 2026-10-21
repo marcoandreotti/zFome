@@ -13,7 +13,7 @@ Após a consolidação do núcleo operacional, um agente pode reduzir fricção 
 
 ### New Capabilities
 
-- `customer-service/ai-customer-agent`: atendimento conversacional seguro sobre capacidades públicas do OrderHub.
+- `customer-service/ai-customer-agent`: atendimento conversacional seguro sobre capacidades públicas do ZFome.
 
 ### Modified Capabilities
 

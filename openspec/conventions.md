@@ -1,4 +1,4 @@
-# Convenções do OrderHub
+# Convenções do zFome
 
 ## Linguagem e plataforma
 

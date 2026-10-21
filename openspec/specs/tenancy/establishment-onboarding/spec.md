@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Guia usuários autorizados pela configuração mínima e retomável necessária para colocar uma unidade do OrderHub em operação com segurança.
+Guia usuários autorizados pela configuração mínima e retomável necessária para colocar uma unidade do zFome em operação com segurança.
 
 ## Requirements
 

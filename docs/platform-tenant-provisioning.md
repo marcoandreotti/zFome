@@ -9,7 +9,7 @@ O fluxo reutiliza os aggregates `Tenant`, `Establishment` e `AdministrativeUser`
 1. Autentique o `PlatformSuperUser` com o código `PLATFORM`, senha definitiva e MFA.
 2. A aplicação direciona a sessão global para `/platform`.
 3. Use **Provisionar Tenant** e informe Tenant, primeira unidade e primeiro Owner.
-4. Entregue a senha temporária ao Owner por canal seguro fora do OrderHub.
+4. Entregue a senha temporária ao Owner por canal seguro fora do ZFome.
 5. O Owner entra com o código público do Tenant, conclui o MFA e troca obrigatoriamente a senha.
 6. Após novo login, o Owner pode continuar o onboarding da unidade.
 
