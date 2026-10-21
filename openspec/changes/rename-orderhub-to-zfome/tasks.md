@@ -36,7 +36,7 @@
 - [ ] 5.2 Executar `dotnet format ZFome.sln --verify-no-changes`, repetir testes/typecheck/build do frontend e revisar `git diff --check` e todos os arquivos alterados.
 - [x] 5.3 Executar busca residual case-insensitive em conteúdo e nomes de arquivo por `OrderHub`, eliminar dependências ativas e verificar individualmente que as únicas ocorrências restantes pertencem à allowlist histórica.
 - [ ] 5.4 Após a validação do conteúdo, renomear o repositório GitHub para `zFome`, atualizar o remote `origin` e verificar fetch/push e a URL remota sem depender do redirecionamento antigo.
-- [ ] 5.5 Renomear o checkout local de `OrderHub` para `zFome`, reabrir as ferramentas no novo caminho e verificar novamente Git, OpenSpec, caminhos do Cérebro e comandos essenciais de build.
+- [x] 5.5 Renomear o checkout local de `OrderHub` para `zFome`, reabrir as ferramentas no novo caminho e verificar novamente Git, OpenSpec, caminhos do Cérebro e comandos essenciais de build.
 
 ## Workflow follow-up
 
