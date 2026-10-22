@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Lets people choose a comfortable color appearance once and use it consistently across OrderHub's public, administrative, operational, kitchen, and platform views.
+Lets people choose a comfortable color appearance once and use it consistently across zFome's public, administrative, operational, kitchen, and platform views.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ A aplicação SHALL aplicar a preferência selecionada a todas as superfícies e
 A aplicação SHALL persistir a opção selecionada no navegador atual e restaurá-la em visitas e superfícies futuras. Uma escolha feita em um navegador MUST NOT alterar preferências de conta ou de outros dispositivos.
 
 #### Scenario: Retornar à aplicação
-- **WHEN** a pessoa abre novamente o OrderHub no mesmo navegador
+- **WHEN** a pessoa abre novamente o zFome no mesmo navegador
 - **THEN** a última opção selecionada é restaurada antes da interação com a interface
 
 ### Requirement: A aparência preserva identidade e contraste

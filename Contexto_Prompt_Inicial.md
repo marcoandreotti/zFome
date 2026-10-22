@@ -2,7 +2,7 @@
 
 Atue como um **Arquiteto de Software Sênior e Desenvolvedor Full Stack especialista em .NET, C#, PostgreSQL, DDD, CQRS, Arquitetura Hexagonal, Clean Architecture, Vue.js e Quasar**.
 
-Quero projetar e posteriormente implementar uma plataforma chamada provisoriamente de **OrderHub**, destinada ao controle de pedidos para:
+Quero projetar e posteriormente implementar uma plataforma chamada provisoriamente de **zFome**, destinada ao controle de pedidos para:
 
 - Bares
 - Restaurantes
@@ -226,33 +226,33 @@ Preferir implementações explícitas, simples, testáveis e controladas pela pr
 Proponha inicialmente uma estrutura semelhante a:
 
 ```text
-OrderHub.sln
+ZFome.sln
 
 src/
- ├── OrderHub.Api
+ ├── ZFome.Api
  │
- ├── OrderHub.Domain
+ ├── ZFome.Domain
  │
- ├── OrderHub.Application
+ ├── ZFome.Application
  │
- ├── OrderHub.Infrastructure
+ ├── ZFome.Infrastructure
  │
- ├── OrderHub.Persistence.Write
+ ├── ZFome.Persistence.Write
  │
- ├── OrderHub.Persistence.Read
+ ├── ZFome.Persistence.Read
  │
- ├── OrderHub.CrossCutting
+ ├── ZFome.CrossCutting
  │
- └── OrderHub.Contracts
+ └── ZFome.Contracts
 
 web/
- └── OrderHub.Web
+ └── ZFome.Web
 
 tests/
- ├── OrderHub.Domain.Tests
- ├── OrderHub.Application.Tests
- ├── OrderHub.Integration.Tests
- └── OrderHub.Architecture.Tests
+ ├── ZFome.Domain.Tests
+ ├── ZFome.Application.Tests
+ ├── ZFome.Integration.Tests
+ └── ZFome.Architecture.Tests
 
 docker/
 scripts/
@@ -1194,7 +1194,7 @@ Explique claramente como esses conceitos serão combinados sem criar complexidad
 Proponha a árvore completa da Solution:
 
 ```text
-OrderHub.sln
+ZFome.sln
 src/
 web/
 tests/

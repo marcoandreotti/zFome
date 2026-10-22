@@ -1,6 +1,6 @@
 ## Purpose
 
-Torna saúde, falhas e desempenho do OrderHub observáveis sem acoplar o domínio nem expor dados sensíveis entre Tenants.
+Torna saúde, falhas e desempenho do zFome observáveis sem acoplar o domínio nem expor dados sensíveis entre Tenants.
 
 ## ADDED Requirements
 

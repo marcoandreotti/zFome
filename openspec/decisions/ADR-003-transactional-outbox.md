@@ -2,7 +2,7 @@
 
 ## Contexto
 
-O OrderHub precisa publicar integrações derivadas de alterações persistidas, como notificações, sem perder mensagens quando o processo termina entre o commit do negócio e o envio externo. O ADR-001 estabeleceu que a solução permanece um monólito modular e que mensageria exige spec e ADR próprios. A change `add-outbox-pattern` especifica persistência atômica, processamento recuperável e operação sem broker externo.
+O zFome precisa publicar integrações derivadas de alterações persistidas, como notificações, sem perder mensagens quando o processo termina entre o commit do negócio e o envio externo. O ADR-001 estabeleceu que a solução permanece um monólito modular e que mensageria exige spec e ADR próprios. A change `add-outbox-pattern` especifica persistência atômica, processamento recuperável e operação sem broker externo.
 
 ## Problema
 

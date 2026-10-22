@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define a consistent, recognizable and accessible presentation for contextual actions in repeated collections and for actions that confirm or submit changes across every OrderHub surface.
+Define a consistent, recognizable and accessible presentation for contextual actions in repeated collections and for actions that confirm or submit changes across every zFome surface.
 
 ## Requirements
 

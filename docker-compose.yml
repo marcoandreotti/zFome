@@ -1,49 +1,49 @@
-name: orderhub
+name: zfome
 
 services:
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-orderhub}
-      POSTGRES_USER: ${POSTGRES_USER:-orderhub}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orderhub_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-zfome}
+      POSTGRES_USER: ${POSTGRES_USER:-zfome}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zfome_dev}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - orderhub-postgres:/var/lib/postgresql/data
+      - zfome-postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
-    networks: [orderhub]
+    networks: [zfome]
 
   mailpit:
     image: axllent/mailpit:v1.31.3
     ports:
       - "${MAILPIT_SMTP_PORT:-1025}:1025"
       - "${MAILPIT_UI_PORT:-8025}:8025"
-    networks: [orderhub]
+    networks: [zfome]
 
   migrations:
     build:
       context: .
-      dockerfile: src/OrderHub.Infrastructure.Migrations/Dockerfile
+      dockerfile: src/ZFome.Infrastructure.Migrations/Dockerfile
     environment:
-      Database__ConnectionString: Host=postgres;Port=5432;Database=${POSTGRES_DB:-orderhub};Username=${POSTGRES_USER:-orderhub};Password=${POSTGRES_PASSWORD:-orderhub_dev}
+      Database__ConnectionString: Host=postgres;Port=5432;Database=${POSTGRES_DB:-zfome};Username=${POSTGRES_USER:-zfome};Password=${POSTGRES_PASSWORD:-zfome_dev}
     depends_on:
       postgres:
         condition: service_healthy
     restart: "no"
-    networks: [orderhub]
+    networks: [zfome]
 
   api:
     build:
       context: .
-      dockerfile: src/OrderHub.Api/Dockerfile
+      dockerfile: src/ZFome.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      Database__ConnectionString: Host=postgres;Port=5432;Database=${POSTGRES_DB:-orderhub};Username=${POSTGRES_USER:-orderhub};Password=${POSTGRES_PASSWORD:-orderhub_dev}
+      Database__ConnectionString: Host=postgres;Port=5432;Database=${POSTGRES_DB:-zfome};Username=${POSTGRES_USER:-zfome};Password=${POSTGRES_PASSWORD:-zfome_dev}
       Authentication__PlatformCode: ${AUTHENTICATION_PLATFORM_CODE:-PLATFORM}
       PlatformBootstrap__Enabled: ${PLATFORM_BOOTSTRAP_ENABLED:-false}
       PlatformBootstrap__Email: ${PLATFORM_BOOTSTRAP_EMAIL:-}
@@ -58,7 +58,7 @@ services:
       NotificationSmtp__Port: ${NOTIFICATION_SMTP_PORT:-1025}
       NotificationSmtp__Username: ${NOTIFICATION_SMTP_USERNAME:-}
       NotificationSmtp__Password: ${NOTIFICATION_SMTP_PASSWORD:-}
-      NotificationSmtp__FromAddress: ${NOTIFICATION_SMTP_FROM_ADDRESS:-no-reply@orderhub.test}
+      NotificationSmtp__FromAddress: ${NOTIFICATION_SMTP_FROM_ADDRESS:-no-reply@zfome.test}
       NotificationSmtp__EnableSsl: ${NOTIFICATION_SMTP_ENABLE_SSL:-false}
       NotificationSmtp__TimeoutSeconds: ${NOTIFICATION_SMTP_TIMEOUT_SECONDS:-15}
       MetaWhatsApp__GraphApiVersion: ${META_WHATSAPP_GRAPH_API_VERSION:-}
@@ -87,7 +87,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks: [orderhub]
+    networks: [zfome]
 
   web:
     build:
@@ -109,11 +109,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks: [orderhub]
+    networks: [zfome]
 
 volumes:
-  orderhub-postgres:
+  zfome-postgres:
 
 networks:
-  orderhub:
+  zfome:
     driver: bridge

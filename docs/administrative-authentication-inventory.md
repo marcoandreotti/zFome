@@ -6,7 +6,7 @@
 - `IPasswordHasher` e `AspNetPasswordHasher` atendem usuários de Tenant e de plataforma.
 - `AdministrativeUser`, seus papéis e associações continuam sendo a fonte de autorização tenant-scoped.
 - `ICommandDispatcher`, `IQueryDispatcher`, FluentValidation, middleware global e ProblemDetails permanecem no fluxo HTTP.
-- `OrderHubDbContext`, projeto dedicado de migrations e PostgreSQL permanecem no caminho de escrita.
+- `zFomeDbContext`, projeto dedicado de migrations e PostgreSQL permanecem no caminho de escrita.
 - `TimeProvider` permanece a fonte de tempo testável.
 
 ## Novos conceitos justificados

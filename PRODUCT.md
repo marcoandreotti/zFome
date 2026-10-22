@@ -14,17 +14,17 @@ Outros usuários essenciais atuam em superfícies específicas: clientes que con
 
 ## Product Purpose
 
-O OrderHub é uma plataforma SaaS multi-tenant para estabelecimentos de alimentação. Seu propósito é permitir que o proprietário ou gestor administre digitalmente o ciclo completo de pedidos, da configuração do catálogo e recebimento do pedido à preparação, acompanhamento e conclusão.
+O zFome é uma plataforma SaaS multi-tenant para estabelecimentos de alimentação. Seu propósito é permitir que o proprietário ou gestor administre digitalmente o ciclo completo de pedidos, da configuração do catálogo e recebimento do pedido à preparação, acompanhamento e conclusão.
 
 ## Positioning
 
-O OrderHub conecta em uma mesma plataforma a administração do estabelecimento, o canal público de pedidos e a operação de atendimento e cozinha, mantendo as responsabilidades e os acessos próprios de cada superfície.
+O zFome conecta em uma mesma plataforma a administração do estabelecimento, o canal público de pedidos e a operação de atendimento e cozinha, mantendo as responsabilidades e os acessos próprios de cada superfície.
 
 ## Operating Context
 
 O produto é usado por estabelecimentos como bares, restaurantes e pizzarias. Proprietários e gestores trabalham na administração da unidade; clientes acessam ofertas e fazem pedidos pela web pública; equipes operacionais acompanham, preparam e concluem pedidos; e o superusuário atua no contexto global da plataforma.
 
-O frontend existente fica em `web/OrderHub.Web`. O usuário confirmou que `PublicOrderingPage` é a página pública e que ainda não a testou; outras partes do projeto foram descritas como funcionais. A disponibilidade técnica de uma página não deve ser tratada como validação funcional feita pelo usuário.
+O frontend existente fica em `web/ZFome.Web`. O usuário confirmou que `PublicOrderingPage` é a página pública e que ainda não a testou; outras partes do projeto foram descritas como funcionais. A disponibilidade técnica de uma página não deve ser tratada como validação funcional feita pelo usuário.
 
 ## Capabilities and Constraints
 

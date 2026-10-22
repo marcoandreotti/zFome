@@ -1,8 +1,8 @@
-# OrderHub
+# zFome
 
 ## Vision
 
-OrderHub é uma plataforma SaaS Multi-Tenant para gerenciamento de pedidos
+zFome é uma plataforma SaaS Multi-Tenant para gerenciamento de pedidos
 de bares, restaurantes, pizzarias e estabelecimentos similares.
 
 ## Principais usuários

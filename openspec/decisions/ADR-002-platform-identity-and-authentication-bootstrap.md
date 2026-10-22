@@ -2,7 +2,7 @@
 
 ## Contexto
 
-O OrderHub isola usuários administrativos por Tenant e permite o mesmo e-mail em Tenants distintos. A plataforma precisa autenticar esses usuários com contexto explícito e também possuir operadores globais capazes de administrar todos os Tenants.
+O zFome isola usuários administrativos por Tenant e permite o mesmo e-mail em Tenants distintos. A plataforma precisa autenticar esses usuários com contexto explícito e também possuir operadores globais capazes de administrar todos os Tenants.
 
 ## Problema
 

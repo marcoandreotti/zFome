@@ -2,7 +2,7 @@
 
 ## Contexto
 
-O OrderHub precisa iniciar como uma aplicação SaaS Multi-Tenant para estabelecimentos de alimentação, com áreas pública, operacional e administrativa. O produto possui um roadmap amplo, mas ainda não há necessidade comprovada de implantação ou escala independente entre bounded contexts.
+O zFome precisa iniciar como uma aplicação SaaS Multi-Tenant para estabelecimentos de alimentação, com áreas pública, operacional e administrativa. O produto possui um roadmap amplo, mas ainda não há necessidade comprovada de implantação ou escala independente entre bounded contexts.
 
 ## Problema
 
@@ -26,11 +26,11 @@ Mantém um único processo e banco inicialmente, separa Domain, Application, Inf
 
 Adotar a Opção C. A solution terá cinco projetos de produção:
 
-- `OrderHub.Domain`, independente de frameworks externos;
-- `OrderHub.Application`, com casos de uso, portas e CQRS;
-- `OrderHub.Infrastructure`, com adapters, EF Core, Dapper e integrações técnicas;
-- `OrderHub.Contracts`, com contratos externos explícitos;
-- `OrderHub.Api`, como composition root e borda HTTP.
+- `ZFome.Domain`, independente de frameworks externos;
+- `ZFome.Application`, com casos de uso, portas e CQRS;
+- `ZFome.Infrastructure`, com adapters, EF Core, Dapper e integrações técnicas;
+- `ZFome.Contracts`, com contratos externos explícitos;
+- `ZFome.Api`, como composition root e borda HTTP.
 
 Os primeiros módulos previstos são Tenancy, Identity, Catalog, Customers e Orders, introduzidos apenas nas fases correspondentes. A comunicação entre módulos ocorrerá por contratos explícitos. EF Core será usado na escrita, Dapper na leitura e PostgreSQL será compartilhado, com ownership por schema quando houver tabelas reais.
 

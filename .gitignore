@@ -9,6 +9,7 @@
 *.user
 *.suo
 TestResults/
+.test-results/
 .idea/
 .vscode/
 .vs/

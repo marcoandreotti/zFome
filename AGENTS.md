@@ -1,6 +1,6 @@
 # AGENTS.md
 
-# OrderHub — Codex Development Rules
+# zFome — Codex Development Rules
 
 Este arquivo contém regras permanentes e obrigatórias para qualquer agente que altere este repositório.
 
@@ -17,7 +17,7 @@ Antes de criar, alterar, refatorar ou remover código:
 
 Regra permanente:
 
-> Antes de escrever código, descubra como o OrderHub já resolve o problema.
+> Antes de escrever código, descubra como o zFome já resolve o problema.
 > Reutilize padrões existentes quando forem semanticamente adequados.
 > Não crie uma segunda maneira de resolver um problema que já possui solução oficial.
 > Se o padrão existente não atender à necessidade, não o contorne silenciosamente: identifique a lacuna e determine se ela exige extensão, novo padrão, atualização de spec ou decisão arquitetural.
@@ -615,10 +615,10 @@ Antes de declarar uma tarefa concluída:
 
 # 27. Cérebro do projeto e memória
 
-O cofre Obsidian é o **Cérebro do OrderHub**: a base de conhecimento do projeto para produto, domínio, arquitetura, decisões, fluxos, padrões e orientações para agentes. No início de cada tarefa, consulte o Cérebro e a memória disponível quando puderem esclarecer o contexto, a intenção, o histórico ou os termos do pedido. Navegue pelas notas relacionadas à tarefa; não é necessário percorrer notas sem relação com ela.
+O cofre Obsidian é o **Cérebro do zFome**: a base de conhecimento do projeto para produto, domínio, arquitetura, decisões, fluxos, padrões e orientações para agentes. No início de cada tarefa, consulte o Cérebro e a memória disponível quando puderem esclarecer o contexto, a intenção, o histórico ou os termos do pedido. Navegue pelas notas relacionadas à tarefa; não é necessário percorrer notas sem relação com ela.
 
-O cofre do OrderHub fica no repositório `C:\Users\marco\source\repos\Obsidian`, em `Arquiteturando/Projetos/OrderHub/`. Comece por `00 - Home/Home.md` ou `00 - Home/Mapa do Projeto.md` para navegar e siga os links para a área relacionada. A nota `Arquiteturando/Bússola de desenvolvimento para agentes.md` e a seção `09 - Agentes/` contêm orientações complementares.
+O cofre do zFome fica no repositório `C:\Users\marco\source\repos\Obsidian`, em `Arquiteturando/Projetos/zFome/`. Comece por `00 - Home/Home.md` ou `00 - Home/Mapa do Projeto.md` para navegar e siga os links para a área relacionada. A nota `Arquiteturando/Bússola de desenvolvimento para agentes.md` e a seção `09 - Agentes/` contêm orientações complementares.
 
-Use o Cérebro para formar o entendimento do projeto e navegar pelo conhecimento registrado. Para requisitos vigentes e decisões normativas, confirme nas fontes oficiais do OrderHub: `AGENTS.md`, OpenSpec, ADRs e Design System, conforme a hierarquia deste arquivo. Em caso de divergência, prevalecem essas fontes oficiais. Diferencie decisões documentadas, observações do código, inferências e informações a confirmar; verifique informações sujeitas a mudança no repositório atual e não transforme inferências em requisitos.
+Use o Cérebro para formar o entendimento do projeto e navegar pelo conhecimento registrado. Para requisitos vigentes e decisões normativas, confirme nas fontes oficiais do zFome: `AGENTS.md`, OpenSpec, ADRs e Design System, conforme a hierarquia deste arquivo. Em caso de divergência, prevalecem essas fontes oficiais. Diferencie decisões documentadas, observações do código, inferências e informações a confirmar; verifique informações sujeitas a mudança no repositório atual e não transforme inferências em requisitos.
 
 Se o cofre não estiver disponível, prossiga com as fontes oficiais acessíveis e registre a limitação somente quando ela afetar a tarefa.
