@@ -44,7 +44,7 @@ onUnmounted(() => {
   <q-page class="auth-page">
     <q-card flat bordered class="auth-card"
       ><q-card-section>
-        <div class="brand-wordmark">zFome</div>
+        <div class="brand-logo"><img :src="'/brand/zfome-logo.png'" alt="zFome" /><span class="brand-logo__sr">zFome</span></div>
         <h1 class="text-h5">Defina sua senha definitiva</h1>
         <p>
           Antes de administrar a plataforma, substitua a senha temporária.

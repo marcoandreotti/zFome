@@ -62,7 +62,7 @@ onUnmounted(() => {
   <q-page class="auth-page">
     <q-card flat bordered class="auth-card">
       <q-card-section>
-        <div class="brand-wordmark">zFome <span>ADMIN</span></div>
+        <div class="brand-logo"><img :src="'/brand/zfome-logo.png'" alt="zFome" /><span class="brand-logo__sr">zFome</span><span>ADMIN</span></div>
         <h1 class="text-h4 q-mt-lg q-mb-sm">
           {{ challengeId ? 'Confira seu e-mail' : 'Bem-vindo de volta' }}
         </h1>

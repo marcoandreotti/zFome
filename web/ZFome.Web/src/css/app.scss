@@ -118,6 +118,32 @@ body {
   color: var(--zf-brand-primary-text);
   margin-left: 8px;
 }
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--zf-brand-primary-text);
+}
+.brand-logo img {
+  display: block;
+  width: 108px;
+  height: auto;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  background: #fff;
+}
+.brand-logo__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 .operations-toolbar { gap: 12px; }
 .operations-unit { width: min(300px, 36vw); }
 @media (max-width: 700px) {

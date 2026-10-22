@@ -32,8 +32,8 @@ async function logout() {
     <q-header bordered class="operations-header">
       <a class="skip-link" href="#operations-content">Ir para o conteúdo</a>
       <q-toolbar class="q-px-md q-py-sm operations-toolbar">
-        <q-toolbar-title class="brand-wordmark">
-          zFome <span>{{ isKitchen ? 'COZINHA' : 'OPERAÇÃO' }}</span>
+        <q-toolbar-title class="brand-logo">
+          <img :src="'/brand/zfome-logo.png'" alt="zFome" /><span class="brand-logo__sr">zFome</span><span>{{ isKitchen ? 'COZINHA' : 'OPERAÇÃO' }}</span>
         </q-toolbar-title>
         <div class="operations-toolbar-controls">
           <q-select
@@ -96,8 +96,8 @@ async function logout() {
 .operations-toolbar-controls { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .operations-navigation { display: flex; align-items: center; gap: 4px; min-width: 0; }
 
-.operations-header :deep(.brand-wordmark) { color: var(--zf-navigation-text); }
-.operations-header :deep(.brand-wordmark span) { color: var(--zf-brand-primary); }
+.operations-header :deep(.brand-logo) { color: var(--zf-navigation-text); }
+.operations-header :deep(.brand-logo > span:last-child) { color: var(--zf-brand-primary); }
 .operations-header :deep(.q-btn) { min-height: 44px; color: var(--zf-navigation-text); }
 .operations-header :deep(.appearance-control__trigger) { color: var(--zf-navigation-text); }
 .operations-header :deep(.operations-navigation .q-btn) { border-radius: 8px; }

@@ -38,8 +38,8 @@ async function logout() {
         <q-btn flat round aria-label="Abrir navegação" @click="drawer = !drawer"
           ><span aria-hidden="true">☰</span></q-btn
         >
-        <q-toolbar-title class="brand-wordmark"
-          >zFome <span>ADMIN</span></q-toolbar-title
+        <q-toolbar-title class="brand-logo"
+          ><img :src="'/brand/zfome-logo.png'" alt="zFome" /><span class="brand-logo__sr">zFome</span><span>ADMIN</span></q-toolbar-title
         >
         <span class="administration-active-unit" aria-label="Unidade ativa">
           {{ activeUnitName }}

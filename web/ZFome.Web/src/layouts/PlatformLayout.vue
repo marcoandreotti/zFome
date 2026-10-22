@@ -11,7 +11,7 @@ async function logout() { try { await session.logout() } finally { await router.
     <q-header bordered class="platform-header">
       <a class="skip-link" href="#platform-content">Ir para o conteúdo</a>
       <q-toolbar class="q-px-md q-py-sm">
-        <q-toolbar-title class="brand-wordmark">zFome <span>PLATFORM</span></q-toolbar-title>
+        <q-toolbar-title class="brand-logo"><img :src="'/brand/zfome-logo.png'" alt="zFome" /><span class="brand-logo__sr">zFome</span><span>PLATFORM</span></q-toolbar-title>
         <AppearanceControl />
         <q-btn flat no-caps label="Sair" @click="logout" />
       </q-toolbar>
