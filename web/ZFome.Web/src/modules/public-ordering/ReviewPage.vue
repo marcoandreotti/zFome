@@ -31,6 +31,9 @@ const submissionKey = ref<{ signature: string; key: string } | undefined>((() =>
   } catch { return undefined }
 })())
 const ratingLabel = (rating: number) => rating > 0 ? `${rating} de 5 estrelas selecionadas` : 'Nenhuma nota selecionada'
+const reviewStatusLabel = (status: string) => ({
+  Pending: 'Aguardando análise', Published: 'Publicada', Hidden: 'Oculta', Rejected: 'Reprovada'
+}[status] ?? status)
 const payloadSignature = async (payload: unknown) => {
   const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(payload))))
   return [...bytes].map(value => value.toString(16).padStart(2, '0')).join('')
@@ -95,7 +98,7 @@ onMounted(load)
       <section class="review-content">
         <nav class="review-navigation" aria-label="Navega&ccedil;&atilde;o da avalia&ccedil;&atilde;o">
           <q-btn v-if="menuPath" flat icon="arrow_back" label="Voltar ao card&aacute;pio" :to="menuPath" />
-          <q-btn flat label="Cancelar avalia&ccedil;&atilde;o" :to="trackingPath" />
+          <q-btn flat label="Voltar ao acompanhamento" :to="trackingPath" />
         </nav>
         <header class="review-intro">
           <h2>Avalie seu pedido</h2>
@@ -104,6 +107,28 @@ onMounted(load)
         <ProblemBanner :error="error"><q-btn flat label="Tentar novamente" @click="load" /></ProblemBanner>
         <div v-if="loading" class="review-loading" role="status"><q-spinner color="primary" /> Carregando pedido&hellip;</div>
         <q-banner v-else-if="sent" class="bg-positive text-white" rounded role="status">Obrigado! Sua avalia&ccedil;&atilde;o foi recebida e ser&aacute; publicada ap&oacute;s an&aacute;lise da equipe.</q-banner>
+        <section v-else-if="eligibility?.establishmentReview" class="review-submitted" role="status">
+          <div class="review-submitted__heading">
+            <div>
+              <p class="review-eyebrow">AVALIA&Ccedil;&Atilde;O ENVIADA</p>
+              <h2>Sua avalia&ccedil;&atilde;o</h2>
+            </div>
+            <q-icon name="verified" size="28px" aria-hidden="true" />
+          </div>
+          <div class="review-submitted__rating" aria-label="Nota do estabelecimento">
+            <span aria-hidden="true">{{ '★'.repeat(eligibility.establishmentReview.rating) }}{{ '☆'.repeat(5 - eligibility.establishmentReview.rating) }}</span>
+            <strong>{{ eligibility.establishmentReview.rating }} de 5 estrelas</strong>
+          </div>
+          <p v-if="eligibility.establishmentReview.comment" class="review-submitted__comment">“{{ eligibility.establishmentReview.comment }}”</p>
+          <small>Status: {{ reviewStatusLabel(eligibility.establishmentReview.status) }}</small>
+          <div v-if="eligibility.products.some(product => product.reviewed)" class="review-submitted__products">
+            <h3>Avalia&ccedil;&otilde;es dos produtos</h3>
+            <div v-for="product in eligibility.products.filter(item => item.reviewed)" :key="product.productId" class="review-submitted__product">
+              <strong>{{ product.productName }}</strong>
+              <span>{{ product.rating }} de 5 estrelas<span v-if="product.comment"> · “{{ product.comment }}”</span></span>
+            </div>
+          </div>
+        </section>
         <q-banner v-else-if="eligibility?.pendingApproval" class="bg-orange-1 text-dark" rounded role="status">Sua avalia&ccedil;&atilde;o est&aacute; aguardando an&aacute;lise da equipe antes de aparecer publicamente.</q-banner>
         <q-banner v-else-if="eligibility && !eligibility.canReview" class="bg-grey-2" rounded>
           Este pedido n&atilde;o est&aacute; mais dispon&iacute;vel para avalia&ccedil;&atilde;o.
@@ -142,6 +167,18 @@ onMounted(load)
 .review-establishment-hero .ordering-unit-label { margin: 0 0 7px; color: var(--zf-brand-primary-text); font-size: .78rem; font-weight: 750; letter-spacing: .045em; }
 .review-content { width: min(100%, 760px); margin: 0 auto; padding: clamp(20px, 4vw, 32px) 0; }
 .review-navigation { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.review-eyebrow { margin: 0 0 5px; color: var(--zf-brand-primary-text); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+.review-submitted { display: grid; gap: 16px; padding: 24px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: var(--zf-surface-raised); }
+.review-submitted__heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; color: var(--zf-status-success-text); }
+.review-submitted__heading h2 { margin: 0; color: var(--zf-text-primary); font-size: 1.5rem; }
+.review-submitted__rating { display: flex; align-items: center; gap: 12px; color: var(--zf-text-primary); }
+.review-submitted__rating > span { color: var(--zf-brand-primary); font-size: 1.5rem; letter-spacing: .08em; }
+.review-submitted__comment { margin: 0; color: var(--zf-text-primary); line-height: 1.6; }
+.review-submitted > small { color: var(--zf-text-muted); }
+.review-submitted__products { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--zf-border-subtle); }
+.review-submitted__products h3 { margin: 0; color: var(--zf-text-primary); font-size: 1rem; }
+.review-submitted__product { display: grid; gap: 3px; }
+.review-submitted__product span { color: var(--zf-text-muted); font-size: .9rem; }
 .review-intro { margin-bottom: 26px; }
 .review-intro h2 { margin: 0; color: var(--zf-text-primary); font-size: clamp(1.7rem, 4vw, 2.25rem); font-weight: 750; letter-spacing: -.03em; line-height: 1.12; }
 .review-intro p { max-width: 58ch; margin: 10px 0 0; color: var(--zf-text-muted); line-height: 1.6; }

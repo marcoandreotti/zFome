@@ -20,6 +20,7 @@ export interface OrderSummary {
   createdAt: string
   scheduledAtUtc?: string | null
   scheduledTimeZoneId?: string | null
+  preparationAvailable?: boolean
   items?: OrderSummaryItem[]
 }
 
@@ -79,6 +80,7 @@ export interface OrderDetail {
   deliveryEstimatedMinutes?: number | null
   scheduledAtUtc?: string | null
   scheduledTimeZoneId?: string | null
+  preparationAvailable?: boolean
 }
 
 export interface OrderPage {

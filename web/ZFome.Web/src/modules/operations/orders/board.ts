@@ -9,4 +9,4 @@ export const sortScheduledOrders = (orders: OrderSummary[]) => [...orders]
     Date.parse(second.scheduledAtUtc ?? second.createdAt))
 
 export const isProductionDue = (order: OrderSummary, now = Date.now()) =>
-  !!order.scheduledAtUtc && Date.parse(order.scheduledAtUtc) <= now
+  !!order.scheduledAtUtc && (order.preparationAvailable ?? Date.parse(order.scheduledAtUtc) <= now)

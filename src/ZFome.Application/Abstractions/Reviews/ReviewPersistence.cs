@@ -37,8 +37,11 @@ public sealed record ReviewOrderContext(Guid TenantId, Guid EstablishmentId, Gui
     string Status, DateTimeOffset? CompletedAt, IReadOnlyList<ReviewOrderProduct> Products,
     string EstablishmentName = "", string? EstablishmentLogoUrl = null, string EstablishmentSlug = "");
 public sealed record ReviewOrderProduct(Guid ProductId, string Name);
-public sealed record ReviewProgress(Guid ProductId, string ProductName, bool Reviewed);
-public sealed record ReviewOrderProgress(bool EstablishmentReviewed, bool PendingApproval, IReadOnlyList<ReviewProgress> Products);
+public sealed record ReviewSubmitted(int Rating, string? Comment, string Status, DateTimeOffset CreatedAt);
+public sealed record ReviewProgress(Guid ProductId, string ProductName, bool Reviewed,
+    int? Rating = null, string? Comment = null, string? Status = null, DateTimeOffset? CreatedAt = null);
+public sealed record ReviewOrderProgress(bool EstablishmentReviewed, bool PendingApproval, IReadOnlyList<ReviewProgress> Products,
+    ReviewSubmitted? EstablishmentReview = null);
 public sealed record ReviewPublicItem(int Rating, string? Comment, DateTimeOffset CreatedAt);
 public sealed record ReviewPublicPage(long Total, IReadOnlyList<ReviewPublicItem> Items);
 public sealed record ReviewRatingSummary(Guid TargetId, decimal Average, long Count, long Rating1Count, long Rating2Count,

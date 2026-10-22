@@ -29,9 +29,19 @@ public sealed class PublicOrderTransaction(ZFomeDbContext context) : IPublicOrde
             await transaction.CommitAsync(cancellationToken);
             return result;
         }
-        catch (PostgresException exception) when (exception.SqlState == PostgresErrorCodes.SerializationFailure)
+        catch (Exception exception) when (IsSerializationFailure(exception))
         {
             throw new ConflictException("The selected order slot was filled by another order. Choose another available time.");
         }
+    }
+
+    private static bool IsSerializationFailure(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is PostgresException { SqlState: PostgresErrorCodes.SerializationFailure }) return true;
+        }
+
+        return false;
     }
 }

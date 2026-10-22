@@ -90,7 +90,7 @@ describe('public review form', () => {
     expect(wrapper.text()).toContain('Lanchonete da Vila')
     expect(wrapper.find('img').attributes('src')).toBe('/logo.png')
     expect(wrapper.text()).toContain('Voltar ao cardápio')
-    expect(wrapper.text()).toContain('Cancelar avaliação')
+    expect(wrapper.text()).toContain('Voltar ao acompanhamento')
   })
 
   it('reuses the idempotency key after a failed response and retry', async () => {
@@ -109,6 +109,26 @@ describe('public review form', () => {
     expect(calls).toHaveLength(2)
     expect(calls[0]![2]).toBe(calls[1]![2])
     expect(wrapper.text()).toContain('recebida')
+    wrapper.unmount()
+  })
+
+  it('shows a submitted review as read-only without a cancellation action', async () => {
+    vi.mocked(publicOrderingClient.reviewProgress).mockResolvedValueOnce({
+      canReview: false, expiresAt: null, establishmentReviewed: true, pendingApproval: true,
+      establishmentName: 'X-Salada', establishmentLogoUrl: null, products: [{
+        productId: 'product-1', productName: 'Misto Quente', reviewed: true,
+        rating: 4, comment: 'Muito bom', status: 'Pending', createdAt: '2026-10-20T12:00:00Z'
+      }],
+      establishmentReview: { rating: 5, comment: 'Excelente atendimento', status: 'Pending', createdAt: '2026-10-20T12:00:00Z' }
+    })
+    const wrapper = mount(ReviewPage, { global: { stubs, directives: { 'close-popup': {} } } })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Excelente atendimento')
+    expect(wrapper.text()).toContain('Aguardando análise')
+    expect(wrapper.text()).toContain('Muito bom')
+    expect(wrapper.text()).not.toContain('Enviar avaliação')
+    expect(wrapper.text()).not.toContain('Cancelar avaliação')
     wrapper.unmount()
   })
 })

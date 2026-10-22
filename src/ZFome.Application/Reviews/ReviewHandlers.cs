@@ -20,7 +20,8 @@ public sealed record ReviewSubmissionResult(DateTimeOffset SubmittedAt, int Rati
 public sealed record GetReviewProgressQuery(string Reference) : IQuery<ReviewEligibility>;
 public sealed record ReviewEligibility(bool CanReview, DateTimeOffset? ExpiresAt,
     bool EstablishmentReviewed, IReadOnlyList<ReviewProgress> Products, bool PendingApproval,
-    string EstablishmentName = "", string? EstablishmentLogoUrl = null, string EstablishmentSlug = "");
+    string EstablishmentName = "", string? EstablishmentLogoUrl = null, string EstablishmentSlug = "",
+    ReviewSubmitted? EstablishmentReview = null);
 
 public sealed record ListPublicReviewsQuery(string Slug, Guid? ProductId, int Page, int PageSize) : IQuery<PublicReviewPage>;
 public sealed record PublicReviewPage(long Total, IReadOnlyList<ReviewPublicItem> Items);
@@ -144,7 +145,7 @@ public sealed class GetReviewProgressHandler(IReviewOrderGateway orders, IReview
         var canReview = IsEligible(order, timeProvider.GetUtcNow()) && !progress.EstablishmentReviewed;
         return new(canReview, order.CompletedAt?.AddDays(30), progress.EstablishmentReviewed,
             progress.Products, progress.PendingApproval, order.EstablishmentName, order.EstablishmentLogoUrl,
-            order.EstablishmentSlug);
+            order.EstablishmentSlug, progress.EstablishmentReview);
     }
 
     internal static bool IsEligible(ReviewOrderContext order, DateTimeOffset now) =>

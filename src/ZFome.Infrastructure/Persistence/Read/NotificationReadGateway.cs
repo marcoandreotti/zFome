@@ -43,8 +43,8 @@ internal sealed class NotificationReadGateway(IReadConnectionFactory connections
                    attempt_count as AttemptCount, last_error as LastError, created_at_utc as CreatedAtUtc, updated_at_utc as UpdatedAtUtc
             from communications.notification
             where tenant_id = @TenantId and establishment_id = @EstablishmentId
-              and (@FromUtc is null or created_at_utc >= @FromUtc)
-              and (@ToUtcExclusive is null or created_at_utc < @ToUtcExclusive)
+              and (cast(@FromUtc as timestamp) is null or created_at_utc >= cast(@FromUtc as timestamp))
+              and (cast(@ToUtcExclusive as timestamp) is null or created_at_utc < cast(@ToUtcExclusive as timestamp))
             order by created_at_utc desc
             offset @Offset limit @PageSize;
             """;

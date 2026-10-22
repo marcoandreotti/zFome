@@ -74,7 +74,8 @@ export function createPublicOrderingClient(http: AxiosInstance) {
 export interface ReviewEligibility {
   canReview: boolean; expiresAt: string | null; establishmentReviewed: boolean; pendingApproval: boolean
   establishmentName?: string; establishmentLogoUrl?: string | null; establishmentSlug?: string
-  products: { productId: string; productName: string; reviewed: boolean }[]
+  establishmentReview?: { rating: number; comment: string | null; status: string; createdAt: string } | null
+  products: { productId: string; productName: string; reviewed: boolean; rating?: number | null; comment?: string | null; status?: string | null; createdAt?: string | null }[]
 }
 export interface PublishReviews {
   establishmentRating: number; establishmentComment: string | null

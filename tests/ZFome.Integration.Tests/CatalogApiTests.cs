@@ -35,7 +35,7 @@ public sealed class CatalogApiTests
     {
         await using var factory = new CatalogApiFactory(null); using var client = factory.CreateClient();
         using var response = await client.GetAsync("/api/public/establishments/missing/catalog"); var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode); Assert.Equal("Resource not found", problem!.Title); Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode); Assert.Equal("Recurso não encontrado", problem!.Title); Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]

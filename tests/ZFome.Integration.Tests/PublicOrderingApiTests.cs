@@ -33,7 +33,7 @@ public sealed class PublicOrderingApiTests
         await using var factory=new PublicApiFactory(null); using var client=factory.CreateClient();
         var request=new PublicOrderConfirmationRequest("Pickup",null,null,null,null,null,Guid.NewGuid(),null,[new(Guid.NewGuid(),null,1,null,[])]);
         var response=await client.PostAsJsonAsync("/api/public/ordering/unit-a/orders",request); var problem=await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        Assert.Equal(HttpStatusCode.BadRequest,response.StatusCode); Assert.Equal("Validation failed",problem!.Title); Assert.Equal("application/problem+json",response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(HttpStatusCode.BadRequest,response.StatusCode); Assert.Equal("Falha na validação",problem!.Title); Assert.Equal("application/problem+json",response.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]

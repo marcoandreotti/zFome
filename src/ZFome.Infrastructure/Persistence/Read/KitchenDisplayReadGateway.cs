@@ -5,7 +5,7 @@ using ZFome.Domain.Ordering;
 
 namespace ZFome.Infrastructure.Persistence.Read;
 
-public sealed class KitchenDisplayReadGateway(IReadConnectionFactory connectionFactory)
+public sealed class KitchenDisplayReadGateway(IReadConnectionFactory connectionFactory, TimeProvider timeProvider)
     : IKitchenDisplayReadGateway
 {
     public async Task<IReadOnlyList<KitchenTicketReadModel>> GetQueueAsync(
@@ -40,6 +40,7 @@ public sealed class KitchenDisplayReadGateway(IReadConnectionFactory connectionF
             where o.tenant_id = @TenantId
               and o.establishment_id = @EstablishmentId
               and o.status in ('Confirmed', 'Preparing')
+              and (o.scheduled_at_utc is null or o.scheduled_at_utc <= @Now + (coalesce((select p.minimum_advance_minutes from operations.order_scheduling_policy p where p.tenant_id=o.tenant_id and p.establishment_id=o.establishment_id and p.service_type = case o.service_type when 'Pickup' then 1 when 'Delivery' then 2 end), 60) * interval '1 minute'))
             order by case when o.status = 'Preparing' then 0 else 1 end,
                      confirmed.occurred_at,
                      o.number;
@@ -57,7 +58,8 @@ public sealed class KitchenDisplayReadGateway(IReadConnectionFactory connectionF
              and o.id = i.order_id
             where o.tenant_id = @TenantId
               and o.establishment_id = @EstablishmentId
-              and o.status in ('Confirmed', 'Preparing')
+             and o.status in ('Confirmed', 'Preparing')
+             and (o.scheduled_at_utc is null or o.scheduled_at_utc <= @Now + (coalesce((select p.minimum_advance_minutes from operations.order_scheduling_policy p where p.tenant_id=o.tenant_id and p.establishment_id=o.establishment_id and p.service_type = case o.service_type when 'Pickup' then 1 when 'Delivery' then 2 end), 60) * interval '1 minute'))
             order by i.order_id, i.id;
 
             select a.order_item_id as OrderItemId,
@@ -75,13 +77,14 @@ public sealed class KitchenDisplayReadGateway(IReadConnectionFactory connectionF
             where o.tenant_id = @TenantId
               and o.establishment_id = @EstablishmentId
               and o.status in ('Confirmed', 'Preparing')
+              and (o.scheduled_at_utc is null or o.scheduled_at_utc <= @Now + (coalesce((select p.minimum_advance_minutes from operations.order_scheduling_policy p where p.tenant_id=o.tenant_id and p.establishment_id=o.establishment_id and p.service_type = case o.service_type when 'Pickup' then 1 when 'Delivery' then 2 end), 60) * interval '1 minute'))
             order by a.order_item_id, a.id;
             """;
 
         await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
         using var grid = await connection.QueryMultipleAsync(new CommandDefinition(
             sql,
-            new { TenantId = tenantId, EstablishmentId = establishmentId },
+            new { TenantId = tenantId, EstablishmentId = establishmentId, Now = timeProvider.GetUtcNow().UtcDateTime },
             cancellationToken: cancellationToken));
 
         var tickets = (await grid.ReadAsync<TicketRow>()).ToArray();

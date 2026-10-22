@@ -36,10 +36,12 @@ const actions: Record<OrderStatus, OrderAction[]> = {
 
 export function availableActions(
   order: Pick<OrderDetail, 'status' | 'serviceType'>,
-  capabilities: readonly string[]
+  capabilities: readonly string[],
+  preparationAvailable = true
 ) {
   return actions[order.status].filter((action) => {
     if (!capabilities.includes(action.capability)) return false
+    if (action.transition === 'prepare' && !preparationAvailable) return false
     if (order.status !== 'Ready') return true
     return action.transition === 'dispatch'
       ? order.serviceType === 'Delivery'

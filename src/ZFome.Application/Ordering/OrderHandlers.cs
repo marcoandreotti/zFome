@@ -154,6 +154,7 @@ public sealed class ConfirmOrderCommandHandler(
 public sealed class TransitionOrderCommandHandler(
     EstablishmentScopeResolver scopeResolver,
     IOrderRepository repository,
+    IOrderSchedulingRepository scheduling,
     ICustomerOrderNotificationStager customerNotifications,
     IOrderUpdatePublisher updatePublisher,
     TimeProvider timeProvider) : ICommandHandler<TransitionOrderCommand>
@@ -168,7 +169,16 @@ public sealed class TransitionOrderCommandHandler(
         {
             switch (command.NewStatus)
             {
-                case OrderStatus.Preparing: order.StartPreparation(now, scope.UserId); break;
+                case OrderStatus.Preparing:
+                    if (order.ScheduledAtUtc is { } scheduledAt)
+                    {
+                        var policy = await scheduling.GetPolicyAsync(scope.TenantId, scope.EstablishmentId, order.ServiceType, cancellationToken);
+                        var minimumAdvance = policy?.MinimumAdvanceMinutes ?? OrderSchedulingPolicy.DefaultMinimumAdvanceMinutes;
+                        if (now < scheduledAt.AddMinutes(-minimumAdvance))
+                            throw new ConflictException("Scheduled order is not ready for preparation yet.");
+                    }
+                    order.StartPreparation(now, scope.UserId);
+                    break;
                 case OrderStatus.Ready: order.MarkReady(now, scope.UserId); break;
                 case OrderStatus.OutForDelivery: order.Dispatch(now, scope.UserId); break;
                 case OrderStatus.Completed: order.Complete(now, scope.UserId); break;

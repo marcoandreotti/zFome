@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import ProblemBanner from '../../components/ProblemBanner.vue'
 import { publicOrderingClient } from './client'
 import { receiptStorage } from './cart'
 import type { Tracking } from './types'
 import { pollingDelay, terminalOrderStatuses } from './tracking'
 
-const reference = String(useRoute().params.reference)
-const homeSlug = receiptStorage.findSlug(reference)
-const homePath = homeSlug ? `/order/${encodeURIComponent(homeSlug)}` : '/'
-const homeLabel = homeSlug ? 'Voltar ao cardápio' : 'Ir para a página inicial'
+const route = useRoute()
+const reference = computed(() => String(route.params.reference))
+const homeSlug = computed(() => receiptStorage.findSlug(reference.value))
+const homePath = computed(() => homeSlug.value ? `/order/${encodeURIComponent(homeSlug.value)}` : '/')
+const homeLabel = computed(() => homeSlug.value ? 'Voltar ao cardápio' : 'Ir para a página inicial')
 const order = ref<Tracking>()
+const relatedOrders = ref<Tracking[]>([])
 const error = ref<unknown>(null)
 const loading = ref(true)
 const cancelling = ref(false)
@@ -30,6 +32,23 @@ const statusTone: Record<string, string> = {
   OutForDelivery: 'info', Completed: 'success', Cancelled: 'danger', Rejected: 'danger'
 }
 const canCancel = computed(() => order.value?.status === 'Confirmed')
+function formatScheduledLabel(scheduledAtUtc: string | null | undefined, timeZone?: string | null) {
+  if (!scheduledAtUtc) return null
+  try {
+    const formatted = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: timeZone ?? undefined,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(scheduledAtUtc))
+    return `Agendado para ${formatted}`
+  } catch {
+    return `Agendado para ${new Date(scheduledAtUtc).toLocaleString('pt-BR')}`
+  }
+}
+const scheduledLabel = computed(() => formatScheduledLabel(order.value?.scheduledAtUtc, order.value?.scheduledTimeZoneId))
 const money = (value: number) => new Intl.NumberFormat('pt-BR', {
   style: 'currency', currency: 'BRL'
 }).format(value)
@@ -41,12 +60,17 @@ function schedule() {
 async function refresh() {
   if (document.visibilityState === 'hidden') { schedule(); return }
   try {
-    order.value = await publicOrderingClient.track(reference)
+    order.value = await publicOrderingClient.track(reference.value)
+    const references = homeSlug.value ? receiptStorage.readAll(homeSlug.value) : []
+    const related = await Promise.allSettled(references.map(item => publicOrderingClient.track(item)))
+    relatedOrders.value = related
+      .filter((result): result is PromiseFulfilledResult<Tracking> => result.status === 'fulfilled')
+      .map(result => result.value)
     reviewAvailable.value = false
     reviewPending.value = false
     if (order.value.status === 'Completed') {
       try {
-        const progress = await publicOrderingClient.reviewProgress(reference)
+        const progress = await publicOrderingClient.reviewProgress(reference.value)
         reviewAvailable.value = progress.canReview
         reviewPending.value = progress.pendingApproval
       } catch { /* Falha de reviews não afeta o acompanhamento do pedido. */ }
@@ -63,10 +87,17 @@ async function cancel() {
   cancelling.value = true
   error.value = null
   try {
-    await publicOrderingClient.cancel(reference, reason.value.trim() || null)
+    await publicOrderingClient.cancel(reference.value, reason.value.trim() || null)
     await refresh()
   } catch (failure) { error.value = failure } finally { cancelling.value = false }
 }
+watch(reference, () => {
+  order.value = undefined
+  relatedOrders.value = []
+  error.value = null
+  failures = 0
+  void refresh()
+})
 function visible() { if (document.visibilityState === 'visible') void refresh() }
 onMounted(() => { document.addEventListener('visibilitychange', visible); void refresh() })
 onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visibilitychange', visible) })
@@ -82,6 +113,17 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
         </div>
         <q-btn flat icon="arrow_back" :label="homeLabel" class="tracking-home-button" :to="homePath" />
       </header>
+      <nav v-if="relatedOrders.length > 1" class="tracking-orders" aria-label="Pedidos recentes">
+        <p class="tracking-eyebrow">PEDIDOS RECENTES</p>
+        <div class="tracking-orders__list">
+          <RouterLink v-for="item in relatedOrders" :key="item.reference" :to="`/order/track/${encodeURIComponent(item.reference)}`"
+            class="tracking-order-link" :class="{ 'tracking-order-link--active': item.reference === reference }">
+            <strong>Pedido nº {{ item.number }}</strong>
+            <span>{{ statusLabel[item.status] ?? item.status }}</span>
+            <small v-if="item.scheduledAtUtc">{{ formatScheduledLabel(item.scheduledAtUtc, item.scheduledTimeZoneId) }}</small>
+          </RouterLink>
+        </div>
+      </nav>
       <ProblemBanner :error="error">
         <q-btn flat label="Tentar novamente" @click="refresh" />
       </ProblemBanner>
@@ -104,6 +146,7 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
             </p>
             <p v-else-if="order.serviceType === 'Pickup'"><q-icon name="storefront" aria-hidden="true" /> Retirada no estabelecimento</p>
             <p v-else><q-icon name="table_restaurant" aria-hidden="true" /> Consumo no local</p>
+            <p v-if="scheduledLabel" class="tracking-scheduled"><q-icon name="event" aria-hidden="true" /> <strong>{{ scheduledLabel }}</strong></p>
           </div>
           <span v-if="!terminalOrderStatuses.has(order.status)" class="tracking-live"><span aria-hidden="true"></span> Atualizando</span>
         </section>
@@ -178,6 +221,11 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
 .tracking-heading > .q-icon, .tracking-card__heading > .q-icon { color: var(--zf-brand-primary-text); }
 .tracking-home-button { min-height: 44px; color: var(--zf-brand-primary-text); }
 .tracking-heading h1 { color: var(--zf-text-primary); font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.12; }
+.tracking-orders { margin: 0 0 24px; padding: 14px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: var(--zf-surface-raised); }
+.tracking-orders__list { display: flex; flex-wrap: wrap; gap: 10px; }
+.tracking-order-link { display: grid; gap: 2px; min-width: 170px; padding: 10px 12px; border: 1px solid var(--zf-border-subtle); border-radius: 10px; color: var(--zf-text-primary); text-decoration: none; }
+.tracking-order-link:hover, .tracking-order-link--active { border-color: var(--zf-brand-primary); background: var(--zf-brand-soft); }
+.tracking-order-link span, .tracking-order-link small { color: var(--zf-text-muted); }
 .tracking-eyebrow { margin: 0 0 5px; color: var(--zf-brand-primary-text); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
 .tracking-loading { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 220px; color: var(--zf-text-muted); }
 .tracking-status-card { display: flex; align-items: center; gap: 18px; margin: 24px 0; padding: 22px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: color-mix(in srgb, var(--zf-brand-soft) 42%, var(--zf-surface-raised)); }
@@ -190,6 +238,7 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
 .tracking-status-card__copy > span { color: var(--zf-text-muted); font-size: .88rem; font-weight: 700; }
 .tracking-status-card__copy h2 { margin: 2px 0 4px; font-size: clamp(1.45rem, 3vw, 2rem); }
 .tracking-status-card__copy p { display: flex; align-items: center; gap: 5px; margin: 0; color: var(--zf-text-muted); }
+.tracking-status-card__copy .tracking-scheduled { margin-top: 7px; color: var(--zf-brand-primary-text); }
 .tracking-live { display: inline-flex; align-items: center; gap: 7px; align-self: flex-start; padding: 6px 10px; border-radius: 999px; background: var(--zf-brand-soft); color: var(--zf-brand-primary-text); font-size: .76rem; font-weight: 700; white-space: nowrap; }
 .tracking-live > span { width: 8px; height: 8px; border-radius: 50%; background: var(--zf-status-success); }
 .tracking-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); align-items: start; gap: 18px; }

@@ -82,7 +82,7 @@ public sealed class OrderApplicationTests
     {
         var order=DraftWithItem();order.Confirm(1,Clock.Now);var repository=new Repository(order);
         var publisher = new Publisher();
-        var handler=new TransitionOrderCommandHandler(Resolver(),repository,new CustomerNotificationStager(),publisher,new Clock());
+        var handler=new TransitionOrderCommandHandler(Resolver(),repository,new SchedulingRepository(),new CustomerNotificationStager(),publisher,new Clock());
         await handler.HandleAsync(new(EstablishmentId,order.Id,OrderStatus.Preparing),CancellationToken.None);
         Assert.Equal(UserId,order.History.Last().ActorId);Assert.True(repository.Saved);
         Assert.Equal(OrderUpdateKind.StatusChanged, Assert.Single(publisher.Signals).ChangeType);
@@ -97,6 +97,7 @@ public sealed class OrderApplicationTests
         var handler = new TransitionOrderCommandHandler(
             Resolver(),
             new Repository(order),
+            new SchedulingRepository(),
             new CustomerNotificationStager(),
             new Publisher(),
             new Clock());
@@ -104,6 +105,27 @@ public sealed class OrderApplicationTests
         await Assert.ThrowsAsync<ConflictException>(() => handler.HandleAsync(
             new TransitionOrderCommand(EstablishmentId, order.Id, OrderStatus.Preparing),
             CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Scheduled_order_cannot_start_preparation_before_minimum_advance_window()
+    {
+        var order = DraftWithItem();
+        order.Confirm(1, Clock.Now);
+        order.Schedule(Clock.Now.AddMinutes(90), "UTC", Clock.Now);
+        var policy = OrderSchedulingPolicy.Create(TenantId, EstablishmentId, OrderServiceType.Pickup, true, 30, 30, null);
+        var handler = new TransitionOrderCommandHandler(
+            Resolver(),
+            new Repository(order),
+            new SchedulingRepository(policy),
+            new CustomerNotificationStager(),
+            new Publisher(),
+            new Clock());
+
+        await Assert.ThrowsAsync<ConflictException>(() => handler.HandleAsync(
+            new TransitionOrderCommand(EstablishmentId, order.Id, OrderStatus.Preparing),
+            CancellationToken.None));
+        Assert.Equal(OrderStatus.Confirmed, order.Status);
     }
 
     [Fact]
@@ -147,6 +169,15 @@ public sealed class OrderApplicationTests
     private sealed class Publisher : IOrderUpdatePublisher
     { public List<OrderUpdateSignal> Signals { get; } = []; public Task PublishAsync(Guid tenantId, OrderUpdateSignal signal, CancellationToken cancellationToken) { Assert.Equal(TenantId, tenantId); Signals.Add(signal); return Task.CompletedTask; } }
     private sealed class CustomerNotificationStager : ICustomerOrderNotificationStager { public Task StageAsync(Order order, CancellationToken cancellationToken) => Task.CompletedTask; }
+    private sealed class SchedulingRepository(OrderSchedulingPolicy? policy = null) : IOrderSchedulingRepository
+    {
+        public Task<OrderSchedulingPolicy?> GetPolicyAsync(Guid tenantId, Guid establishmentId, OrderServiceType serviceType, CancellationToken cancellationToken) => Task.FromResult(policy);
+        public Task<IReadOnlyList<OrderSchedulingPolicy>> GetPoliciesAsync(Guid tenantId, Guid establishmentId, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<OrderSchedulingPolicy>>([]);
+        public Task<string?> GetTimeZoneIdAsync(Guid tenantId, Guid establishmentId, CancellationToken cancellationToken) => Task.FromResult<string?>("UTC");
+        public Task<int> CountReservedOrdersAsync(Guid tenantId, Guid establishmentId, OrderServiceType serviceType, DateTimeOffset slotStart, CancellationToken cancellationToken) => Task.FromResult(0);
+        public void Add(OrderSchedulingPolicy policy) { }
+        public Task SaveChangesAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    }
     private sealed class ReadGateway : IOrderReadGateway
     { public Guid TenantId { get; private set; } public Guid EstablishmentId { get; private set; } public Task<OrderReadModel?> GetAsync(Guid tenantId, Guid establishmentId, Guid orderId, CancellationToken cancellationToken) { TenantId = tenantId; EstablishmentId = establishmentId; return Task.FromResult<OrderReadModel?>(new(orderId, null, null, OrderServiceType.Pickup, OrderStatus.Draft, null, null, null, null, 0, 0, 0, 0, null, 0, 0, false, [], [])); } public Task<OrderSearchResult> SearchAsync(Guid tenantId, Guid establishmentId, DateTimeOffset? from, DateTimeOffset? to, OrderStatus? status, long? number, OrderServiceType? serviceType, int page, int pageSize, CancellationToken cancellationToken)=>Task.FromResult(new OrderSearchResult(0,[])); }
     private sealed class CouponRepository : ICouponRepository

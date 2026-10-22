@@ -34,7 +34,7 @@ public sealed class OrderPersistenceTests : IAsyncLifetime
             tenantId = tenant.Id; establishmentId = unit.Id; orderId = order.Id;
         }
 
-        var gateway = new OrderReadGateway(new NpgsqlReadConnectionFactory(Microsoft.Extensions.Options.Options.Create(new DatabaseOptions { ConnectionString = database.GetConnectionString() })));
+        var gateway = new OrderReadGateway(new NpgsqlReadConnectionFactory(Microsoft.Extensions.Options.Options.Create(new DatabaseOptions { ConnectionString = database.GetConnectionString() })), TimeProvider.System);
         var result = await gateway.GetAsync(tenantId, establishmentId, orderId, CancellationToken.None);
 
         Assert.NotNull(result); Assert.Equal("Produto antigo", Assert.Single(result.Items).ProductName); Assert.Equal("Adicional antigo", Assert.Single(result.Items[0].Additionals).Name);
@@ -69,7 +69,7 @@ public sealed class OrderPersistenceTests : IAsyncLifetime
             tenantId = tenant.Id; establishmentId = unit.Id; orderId = order.Id;
         }
 
-        var gateway = new OrderReadGateway(new NpgsqlReadConnectionFactory(Microsoft.Extensions.Options.Options.Create(new DatabaseOptions { ConnectionString = database.GetConnectionString() })));
+        var gateway = new OrderReadGateway(new NpgsqlReadConnectionFactory(Microsoft.Extensions.Options.Options.Create(new DatabaseOptions { ConnectionString = database.GetConnectionString() })), TimeProvider.System);
         var result = await gateway.GetAsync(tenantId, establishmentId, orderId, CancellationToken.None);
         Assert.NotNull(result);
         var item = Assert.Single(result.Items);
@@ -164,7 +164,7 @@ public sealed class OrderPersistenceTests : IAsyncLifetime
             Microsoft.Extensions.Options.Options.Create(new DatabaseOptions
             {
                 ConnectionString = database.GetConnectionString()
-            })));
+            })), TimeProvider.System);
 
         var queue = await gateway.GetQueueAsync(
             tenantId,

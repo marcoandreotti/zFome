@@ -102,7 +102,8 @@ public sealed record OrderReadModel(
     decimal DeliveryFee = 0,
     int? DeliveryEstimatedMinutes = null,
     DateTimeOffset? ScheduledAtUtc = null,
-    string? ScheduledTimeZoneId = null);
+    string? ScheduledTimeZoneId = null,
+    bool PreparationAvailable = true);
 
 public sealed record OrderItemReadModel(Guid Id, string ProductName, string? VariationName, decimal UnitPrice, decimal Quantity, decimal Total, string? Notes, IReadOnlyList<OrderAdditionalReadModel> Additionals, decimal BasePrice = 0, IReadOnlyList<OrderModifierGroupReadModel>? ModifierGroups = null);
 public sealed record OrderAdditionalReadModel(string Name, decimal UnitPrice, decimal Quantity);
@@ -111,4 +112,4 @@ public sealed record OrderModifierOptionReadModel(Guid OptionId, string Name, de
 public sealed record OrderHistoryReadModel(OrderStatus PreviousStatus, OrderStatus NewStatus, DateTimeOffset OccurredAt, Guid? ActorId, string? Note);
 public sealed record OrderSearchResult(int Total, IReadOnlyList<OrderSummaryReadModel> Items);
 public sealed record OrderSummaryItemReadModel(decimal Quantity, string ProductName, string? VariationName);
-public sealed record OrderSummaryReadModel(Guid Id, long Number, OrderServiceType ServiceType, OrderStatus Status, string? CustomerName, string? CustomerPhone, decimal Total, DateTimeOffset CreatedAt, DateTimeOffset? ScheduledAtUtc = null, string? ScheduledTimeZoneId = null, IReadOnlyList<OrderSummaryItemReadModel>? Items = null);
+public sealed record OrderSummaryReadModel(Guid Id, long Number, OrderServiceType ServiceType, OrderStatus Status, string? CustomerName, string? CustomerPhone, decimal Total, DateTimeOffset CreatedAt, DateTimeOffset? ScheduledAtUtc = null, string? ScheduledTimeZoneId = null, IReadOnlyList<OrderSummaryItemReadModel>? Items = null, bool PreparationAvailable = true);

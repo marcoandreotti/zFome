@@ -86,11 +86,18 @@ public sealed class ReviewReadGateway(IReadConnectionFactory connections) : IRev
     public async Task<ReviewOrderProgress> GetProgressAsync(ReviewOrderContext order, CancellationToken cancellationToken)
     {
         await using var db = await connections.OpenConnectionAsync(cancellationToken);
-        var targets = (await db.QueryAsync<ReviewedTarget>(new CommandDefinition("select target_kind TargetKind, target_id TargetId, status Status from reviews.review where tenant_id=@TenantId and establishment_id=@EstablishmentId and order_id=@OrderId", order, cancellationToken: cancellationToken))).ToArray();
-        var establishmentReviewed = targets.Any(x => x.TargetKind == "Establishment" && x.TargetId == order.EstablishmentId);
-        var productIds = targets.Where(x => x.TargetKind == "Product").Select(x => x.TargetId).ToHashSet();
+        var targets = (await db.QueryAsync<ReviewedTarget>(new CommandDefinition("select target_kind TargetKind, target_id TargetId, rating Rating, comment Comment, status Status, created_at CreatedAt from reviews.review where tenant_id=@TenantId and establishment_id=@EstablishmentId and order_id=@OrderId", order, cancellationToken: cancellationToken))).ToArray();
+        var establishment = targets.FirstOrDefault(x => x.TargetKind == "Establishment" && x.TargetId == order.EstablishmentId);
+        var establishmentReviewed = establishment is not null;
+        var productReviews = targets.Where(x => x.TargetKind == "Product").ToDictionary(x => x.TargetId);
         var pending = targets.Any(x => x.Status == "Pending");
-        return new(establishmentReviewed, pending, order.Products.Select(x => new ReviewProgress(x.ProductId, x.Name, productIds.Contains(x.ProductId))).ToArray());
+        var products = order.Products.Select(x => productReviews.TryGetValue(x.ProductId, out var review)
+            ? new ReviewProgress(x.ProductId, x.Name, true, review.Rating, review.Comment, review.Status, ToUtcOffset(review.CreatedAt))
+            : new ReviewProgress(x.ProductId, x.Name, false)).ToArray();
+        var establishmentReview = establishment is null
+            ? null
+            : new ReviewSubmitted(establishment.Rating, establishment.Comment, establishment.Status, ToUtcOffset(establishment.CreatedAt));
+        return new(establishmentReviewed, pending, products, establishmentReview);
     }
 
     private static DateTimeOffset ToUtcOffset(DateTime value) =>
@@ -99,5 +106,5 @@ public sealed class ReviewReadGateway(IReadConnectionFactory connections) : IRev
     private sealed record PublicReviewRow(int Rating, string? Comment, DateTime CreatedAt);
     private sealed record AdminReviewRow(Guid Id, Guid? ProductId, string? ProductName, int Rating, string? Comment,
         string Status, string? ModerationReason, DateTime CreatedAt, DateTime UpdatedAt);
-    private sealed record ReviewedTarget(string TargetKind, Guid TargetId, string Status);
+    private sealed record ReviewedTarget(string TargetKind, Guid TargetId, int Rating, string? Comment, string Status, DateTime CreatedAt);
 }

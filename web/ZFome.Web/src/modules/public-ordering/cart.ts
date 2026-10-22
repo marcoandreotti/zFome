@@ -93,11 +93,21 @@ export function orderItems(items: CartItem[]): OrderItemRequest[] {
 }
 export const receiptStorage = {
   save(slug: string, reference: string) {
-    storage()?.setItem('zfome.public-receipt.' + slug, reference)
+    const references = this.readAll(slug).filter(value => value !== reference)
+    references.unshift(reference)
+    storage()?.setItem('zfome.public-receipt.' + slug, JSON.stringify(references.slice(0, 10)))
   },
   read(slug: string) {
-    const value = storage()?.getItem('zfome.public-receipt.' + slug) ?? ''
-    return /^[0-9a-f]{48}$/.test(value) ? value : null
+    return this.readAll(slug)[0] ?? null
+  },
+  readAll(slug: string) {
+    const raw = storage()?.getItem('zfome.public-receipt.' + slug)
+    if (!raw) return [] as string[]
+    try {
+      const values = JSON.parse(raw)
+      if (Array.isArray(values)) return values.filter(value => typeof value === 'string' && /^[0-9a-f]{48}$/.test(value))
+    } catch { /* Migração do formato antigo abaixo. */ }
+    return /^[0-9a-f]{48}$/.test(raw) ? [raw] : []
   },
   findSlug(reference: string) {
     const store = storage()
@@ -105,8 +115,8 @@ export const receiptStorage = {
     const prefix = 'zfome.public-receipt.'
     for (let index = 0; index < store.length; index++) {
       const key = store.key(index)
-      if (key?.startsWith(prefix) && store.getItem(key) === reference)
-        return key.slice(prefix.length)
+      if (!key?.startsWith(prefix)) continue
+      if (this.readAll(key.slice(prefix.length)).includes(reference)) return key.slice(prefix.length)
     }
     return null
   }

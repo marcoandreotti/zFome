@@ -113,6 +113,7 @@ describe('store operacional normalizada', () => {
 describe('matriz visual de ações', () => {
   it('oferece somente ações compatíveis com capacidade, estado e atendimento', () => {
     expect(availableActions(detail(), ['order-kitchen']).map((x) => x.transition)).toEqual(['prepare'])
+    expect(availableActions(detail(), ['order-kitchen'], false)).toEqual([])
     expect(availableActions(detail('Preparing'), ['order-attendance']).map((x) => x.transition)).toEqual(['cancel'])
     expect(availableActions(detail('Ready'), ['order-delivery']).map((x) => x.transition)).toEqual(['dispatch'])
     expect(
@@ -171,9 +172,10 @@ describe('organização temporal do board', () => {
   })
 
   it('promove visualmente o agendado quando chega a janela de produção', () => {
-    const scheduled = { ...summary('5'), scheduledAtUtc: '2026-09-29T14:00:00Z' }
-    expect(isProductionDue(scheduled, Date.parse('2026-09-29T14:00:00Z'))).toBe(true)
-    expect(isProductionDue(scheduled, Date.parse('2026-09-29T13:59:59Z'))).toBe(false)
+    const scheduled = { ...summary('5'), scheduledAtUtc: '2026-09-29T14:00:00Z', preparationAvailable: true }
+    const future = { ...scheduled, preparationAvailable: false }
+    expect(isProductionDue(scheduled, Date.parse('2026-09-29T13:00:00Z'))).toBe(true)
+    expect(isProductionDue(future, Date.parse('2026-09-29T14:00:00Z'))).toBe(false)
   })
 })
 

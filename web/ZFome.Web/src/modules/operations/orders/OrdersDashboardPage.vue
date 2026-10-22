@@ -56,11 +56,11 @@ const selected = computed(() =>
 )
 const selectedActions = computed(() =>
   selected.value
-    ? availableActions(selected.value, session.context?.capabilities ?? [])
+    ? availableActions(selected.value, session.context?.capabilities ?? [], selected.value.preparationAvailable !== false)
     : []
 )
 const cardAction = (order: OrderSummary) =>
-  availableActions(order, session.context?.capabilities ?? [])[0]
+  availableActions(order, session.context?.capabilities ?? [], order.preparationAvailable !== false)[0]
 const interval = Math.max(
   5_000,
   Number(import.meta.env.VITE_OPERATIONS_POLL_INTERVAL_MS) || 15_000

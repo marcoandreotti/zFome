@@ -8,6 +8,7 @@ import { ApiError } from '../src/http/client'
 const route = vi.hoisted(() => ({ params: { slug: 'unit', tableToken: undefined as string | undefined } }))
 const push = vi.hoisted(() => vi.fn())
 vi.mock('vue-router', () => ({
+  RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' },
   useRoute: () => route,
   useRouter: () => ({ push })
 }))
@@ -395,7 +396,7 @@ describe('checkout idempotente', () => {
     expect(keys).toHaveLength(2)
     expect(keys[0]).toBe(keys[1])
     expect(wrapper.text()).toContain('Pedido confirmado')
-    expect(localStorage.getItem('zfome.public-receipt.unit')).toBe('r'.repeat(48))
+    expect(JSON.parse(localStorage.getItem('zfome.public-receipt.unit')!)).toEqual(['r'.repeat(48)])
     wrapper.unmount()
   })
 
@@ -538,5 +539,41 @@ it('mantém acompanhamento após cancelamento rejeitado', async () => {
   await flushPromises()
   expect(wrapper.text()).toContain('Pedido confirmado')
   expect(wrapper.get('[role="alert"]').text()).toContain('não pode mais ser cancelado')
+  wrapper.unmount()
+})
+
+it('exibe a data e o horário do pedido agendado no acompanhamento', async () => {
+  route.params = { slug: 'unit', tableToken: undefined }
+  ;(route.params as Record<string, string>).reference = 'r'.repeat(48)
+  vi.mocked(publicOrderingClient.track).mockResolvedValue({
+    reference: 'r'.repeat(48), number: 43, serviceType: 'Pickup', status: 'Confirmed',
+    subtotal: 22, discount: 0, fees: 0, total: 22, couponCode: null, items: [],
+    scheduledAtUtc: '2026-10-22T12:30:00Z', scheduledTimeZoneId: 'America/Sao_Paulo',
+    history: [{ status: 'Confirmed', occurredAt: '2026-10-22T10:00:00Z', note: null }]
+  })
+  const wrapper = mount(TrackingPage, { global: { stubs } })
+  await flushPromises()
+  expect(wrapper.text()).toContain('Agendado para 22/10/2026, 09:30')
+  wrapper.unmount()
+})
+
+it('mantém pedidos recentes acessíveis quando há mais de uma referência no estabelecimento', async () => {
+  const currentReference = 'b'.repeat(48)
+  const scheduledReference = 'a'.repeat(48)
+  route.params = { slug: 'unit', tableToken: undefined, reference: currentReference }
+  localStorage.setItem('zfome.public-receipt.unit', JSON.stringify([currentReference, scheduledReference]))
+  vi.mocked(publicOrderingClient.track).mockImplementation(async reference => ({
+    reference, number: reference === currentReference ? 43 : 44, serviceType: 'Pickup', status: 'Confirmed',
+    subtotal: 22, discount: 0, fees: 0, total: 22, couponCode: null, items: [],
+    scheduledAtUtc: reference === scheduledReference ? '2026-10-22T12:30:00Z' : null,
+    scheduledTimeZoneId: reference === scheduledReference ? 'America/Sao_Paulo' : null,
+    history: [{ status: 'Confirmed', occurredAt: '2026-10-22T10:00:00Z', note: null }]
+  }))
+  const wrapper = mount(TrackingPage, { global: { stubs } })
+  await flushPromises()
+  const navigation = wrapper.get('[aria-label="Pedidos recentes"]')
+  expect(navigation.text()).toContain('Pedido nº 44')
+  expect(navigation.text()).toContain('Agendado para 22/10/2026, 09:30')
+  expect(navigation.find(`a[href="/order/track/${scheduledReference}"]`).exists()).toBe(true)
   wrapper.unmount()
 })

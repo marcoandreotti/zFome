@@ -116,12 +116,12 @@ onMounted(load)
 </script>
 
 <template>
-  <q-page class="page-shell review-admin">
-    <header class="page-heading">
+  <q-page class="admin-page review-admin">
+    <header class="admin-page-header">
       <div>
-        <p class="text-overline q-mb-xs">GESTÃO</p>
-        <h1 class="text-h4 q-my-none">Avaliações</h1>
-        <p class="text-body2 text-grey-7">Comentários públicos e moderação da unidade.</p>
+        <p class="admin-page-eyebrow">GESTÃO</p>
+        <h1 class="text-h4 q-my-sm">Avaliações</h1>
+        <p>Comentários públicos e moderação da unidade.</p>
       </div>
     </header>
 
@@ -148,7 +148,7 @@ onMounted(load)
         @update:model-value="page = 1; load()" />
     </div>
 
-    <q-card flat bordered>
+    <q-card flat bordered class="review-admin__table-card">
       <q-table :rows="rows" :columns="[
         { name: 'review', label: 'Avaliação', field: 'rating', align: 'left' },
         { name: 'target', label: 'Alvo', field: 'productName', align: 'left' },
@@ -162,7 +162,7 @@ onMounted(load)
               :icon-aria-label="['1 estrela', '2 estrelas', '3 estrelas', '4 estrelas', '5 estrelas']"
               :aria-label="`Nota: ${props.row.rating} de 5 estrelas`" />
             <span class="text-caption">{{ props.row.rating }} de 5</span>
-            <p v-if="props.row.comment" class="q-mb-none text-body2">{{ props.row.comment }}</p>
+            <p v-if="props.row.comment" class="review-admin__comment q-mb-none text-body2">{{ props.row.comment }}</p>
           </q-td>
         </template>
         <template #body-cell-target="props">
@@ -181,20 +181,22 @@ onMounted(load)
         </template>
         <template #body-cell-actions="props">
           <q-td :props="props">
-            <q-btn v-if="props.row.status === 'Pending'" flat color="positive" label="Aprovar e publicar"
-              :loading="busy === props.row.id" @click="approve(props.row)" />
-            <q-btn v-if="props.row.status === 'Pending' || props.row.status === 'Published'" flat color="negative"
-              :label="props.row.status === 'Pending' ? 'Reprovar' : 'Ocultar'"
-              :loading="busy === props.row.id" @click="openModeration(props.row)" />
-            <q-btn v-if="props.row.status === 'Hidden'" flat color="primary" label="Restaurar e publicar"
-              :loading="busy === props.row.id" @click="restore(props.row)" />
+            <div class="review-admin__actions">
+              <q-btn v-if="props.row.status === 'Pending'" flat color="positive" label="Aprovar e publicar"
+                :loading="busy === props.row.id" @click="approve(props.row)" />
+              <q-btn v-if="props.row.status === 'Pending' || props.row.status === 'Published'" flat color="negative"
+                :label="props.row.status === 'Pending' ? 'Reprovar' : 'Ocultar'"
+                :loading="busy === props.row.id" @click="openModeration(props.row)" />
+              <q-btn v-if="props.row.status === 'Hidden'" flat color="primary" label="Restaurar e publicar"
+                :loading="busy === props.row.id" @click="restore(props.row)" />
+            </div>
           </q-td>
         </template>
         <template #no-data>
           <div class="full-width row flex-center q-pa-lg text-grey-7">Nenhuma avaliação encontrada.</div>
         </template>
       </q-table>
-      <div class="row justify-end q-pa-sm">
+      <div class="review-admin__pagination row justify-end q-pa-sm">
         <q-pagination v-model="page" :max="Math.max(1, Math.ceil(total / 20))" @update:model-value="load" />
       </div>
     </q-card>
@@ -219,3 +221,55 @@ onMounted(load)
     </q-dialog>
   </q-page>
 </template>
+
+<style scoped>
+.review-admin {
+  min-width: 0;
+}
+
+.review-admin__table-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.review-admin__table-card :deep(.q-table__middle) {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.review-admin__table-card :deep(.q-table) {
+  min-width: 760px;
+}
+
+.review-admin__table-card :deep(.q-table th),
+.review-admin__table-card :deep(.q-table td) {
+  white-space: normal;
+}
+
+.review-admin__comment {
+  max-width: 34rem;
+  overflow-wrap: anywhere;
+}
+
+.review-admin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.review-admin__pagination {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .review-admin__table-card :deep(.q-table) {
+    min-width: 700px;
+  }
+
+  .review-admin__actions {
+    justify-content: flex-start;
+  }
+}
+</style>
