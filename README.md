@@ -1,16 +1,158 @@
-# zFome
+<p align="center">
+  <img src="web/ZFome.Web/public/brand/zfome-logo.png" alt="zFome" width="240" />
+</p>
 
-Documentação operacional: [notificações de pedidos em tempo real](docs/realtime-order-notifications.md).
+<p align="center">
+  <strong>Seu estabelecimento, seus pedidos, seu ritmo.</strong><br />
+  Plataforma SaaS multi-tenant para transformar cardápio, pedidos e operação em um único fluxo.
+</p>
 
-Fundação do monólito modular SaaS Multi-Tenant para gestão de pedidos de estabelecimentos de alimentação.
+<p align="center">
+  <a href="#visão-do-produto">Produto</a> ·
+  <a href="#arquitetura">Arquitetura</a> ·
+  <a href="#executando-localmente">Executar</a> ·
+  <a href="#documentação">Documentação</a>
+</p>
 
-## Pré-requisitos
+---
 
-- .NET SDK 10
-- Node.js 22.22 ou superior
-- Docker 29 com Docker Compose
+## O que é o zFome?
 
-## Backend
+O zFome é uma plataforma para bares, restaurantes, pizzarias, lanchonetes e outros estabelecimentos de alimentação gerenciarem sua operação digital.
+
+Ele conecta:
+
+- cardápio público e descoberta por cliente;
+- criação e acompanhamento de pedidos;
+- retirada, entrega e pedidos agendados;
+- administração do estabelecimento;
+- operação da cozinha e atendimento;
+- avaliações e reputação;
+- notificações e comunicação;
+- configuração multi-tenant com isolamento por estabelecimento.
+
+O projeto está sendo construído como um **monólito modular**, priorizando evolução segura, testes, manutenção e clareza de domínio antes de qualquer extração para serviços independentes.
+
+## Visão do produto
+
+```mermaid
+flowchart LR
+    C[Cliente] --> P[Cardápio público]
+    P --> O[Pedido]
+    O --> A[Administração]
+    O --> K[Operações e cozinha]
+    K --> S[Retirada ou entrega]
+    S --> T[Acompanhamento do cliente]
+    T --> R[Avaliação e reputação]
+```
+
+### Superfícies da aplicação
+
+| Superfície | Objetivo |
+| --- | --- |
+| Public | Descoberta, cardápio, carrinho, checkout e acompanhamento do cliente. |
+| Administration | Configuração do estabelecimento, catálogo, disponibilidade, usuários e relatórios. |
+| Operations | Acompanhamento rápido de pedidos, preparação, retirada e entrega. |
+| KDS | Leitura à distância e execução do trabalho da cozinha. |
+| Platform | Provisionamento e contexto institucional da plataforma. |
+
+## Em destaque
+
+- **Cardápio digital** com categorias, produtos, imagens, preços e composição.
+- **Pedidos em tempo real** com estados claros para cliente, atendimento e cozinha.
+- **Pedidos agendados** com janela de preparo e regras de antecedência.
+- **Acompanhamento público** sem exigir autenticação do cliente nesta fase.
+- **Avaliações** vinculadas ao pedido, com publicação e moderação previstas no domínio.
+- **Multi-tenancy** com isolamento de dados por estabelecimento.
+- **Tema claro e escuro** persistido no navegador.
+- **Notificações locais** através do Mailpit durante o desenvolvimento.
+
+## Arquitetura
+
+O zFome utiliza .NET 10 no backend e Vue/Quasar no frontend, seguindo Clean Architecture, DDD, CQRS e princípios de arquitetura hexagonal.
+
+```mermaid
+flowchart TB
+    WEB[Vue + Quasar + TypeScript]
+    API[ZFome.Api\nControllers finos]
+    APP[ZFome.Application\nCommands, Queries e handlers]
+    DOMAIN[ZFome.Domain\nAgregados e regras]
+    WRITE[EF Core\nWrite Gateway]
+    READ[Dapper\nRead Gateway]
+    DB[(PostgreSQL)]
+
+    WEB --> API
+    API --> APP
+    APP --> DOMAIN
+    APP --> WRITE
+    APP --> READ
+    WRITE --> DB
+    READ --> DB
+```
+
+### Fluxos de escrita e leitura
+
+```text
+Escrita:
+HTTP → Controller → CommandDispatcher → Validator → CommandHandler
+      → Domain → Write Gateway → EF Core → PostgreSQL
+
+Leitura:
+HTTP → Controller → QueryDispatcher → Validator → QueryHandler
+      → Read Gateway → Dapper → PostgreSQL → Read Model
+```
+
+O domínio permanece independente de HTTP, EF Core, Dapper, PostgreSQL, Docker e Vue. Controllers não acessam banco nem concentram regras de negócio.
+
+## Stack
+
+| Camada | Tecnologias |
+| --- | --- |
+| Backend | .NET 10, C#, ASP.NET Core |
+| Frontend | Vue.js, Quasar, TypeScript |
+| Persistência | PostgreSQL, Entity Framework Core, Dapper |
+| Execução local | Docker, Docker Compose, Visual Studio |
+| Qualidade | Testes unitários, integração e testes de frontend |
+| Arquitetura | Modular Monolith, Clean Architecture, DDD, CQRS |
+
+## Executando localmente
+
+### Pré-requisitos
+
+- .NET SDK 10;
+- Node.js 22.22 ou superior;
+- Docker 29 com Docker Compose;
+- Visual Studio ou terminal PowerShell.
+
+### Docker Compose
+
+```powershell
+docker compose up --build
+```
+
+Serviços padrão:
+
+| Serviço | URL |
+| --- | --- |
+| Aplicação web | http://localhost:9000 |
+| API | http://localhost:8080 |
+| Mailpit | http://localhost:8025 |
+| SMTP local | localhost:1025 |
+| PostgreSQL | localhost:5432 |
+
+O serviço de migrations é executado antes da API. Não é necessário executar `dotnet ef database update` manualmente para o fluxo padrão do Compose.
+
+Para acompanhar o diagnóstico:
+
+```powershell
+docker compose ps -a
+docker compose logs migrations
+docker compose logs api
+```
+
+> Se o Visual Studio já estiver executando o projeto, não inicie uma segunda composição usando as mesmas portas. O Visual Studio já cria o stack do Compose, incluindo o Mailpit.
+
+### Backend sem Docker
 
 ```powershell
 dotnet restore ZFome.sln
@@ -19,9 +161,7 @@ dotnet test ZFome.sln --no-build
 dotnet run --project src/ZFome.Api
 ```
 
-A API expõe liveness em `GET /health` e readiness do PostgreSQL em `GET /health/ready`.
-
-## Frontend
+### Frontend isolado
 
 ```powershell
 cd web/ZFome.Web
@@ -29,63 +169,86 @@ npm install
 npm run dev
 ```
 
-## Docker
+## Testes e validação
 
-Copie `.env.example` para `.env`, ajuste apenas valores locais e execute:
-
-```powershell
-docker compose up --build
-```
-
-O serviço `migrations` aplica as migrations pendentes no PostgreSQL antes da
-API iniciar. Não é necessário executar `dotnet ef database update` manualmente
-para o fluxo local do Compose. O mesmo vale para banco recém-criado e para banco
-já atualizado.
-
-Se a API não iniciar por falha de migration, consulte a saída com:
+Backend:
 
 ```powershell
-docker compose ps -a migrations
-docker compose logs migrations
+dotnet test ZFome.sln
 ```
 
-Corrija a migration ou a configuração indicada no log e inicie novamente com
-`docker compose up --build`. A API só inicia depois que o serviço `migrations`
-terminar com sucesso. Para executar migrations manualmente fora do Compose,
-consulte [as instruções do projeto de migrations](src/ZFome.Infrastructure/Persistence/Write/Migrations/README.md).
-
-Serviços locais:
-
-- Web (Quasar em modo desenvolvimento com hot reload): `http://localhost:9000`
-- API: `http://localhost:8080`
-- PostgreSQL: `localhost:5432`
-
-O `docker-compose.override.yml` é carregado automaticamente no desenvolvimento:
-ele monta `web/ZFome.Web` no container e inicia `quasar dev`, refletindo
-alterações de Vue/TypeScript sem reconstruir a imagem. Em hosts Windows, o watcher
-usa polling para detectar alterações nos arquivos montados. Para executar o
-frontend estático de produção definido no `docker-compose.yml`, use explicitamente:
+Frontend:
 
 ```powershell
-docker compose -f docker-compose.yml up --build
+cd web/ZFome.Web
+npm run build
+npm test
 ```
 
-## Arquitetura
+Antes de abrir uma mudança, revise também:
 
-- `ZFome.Domain`: modelo e regras de domínio, sem dependências externas.
-- `ZFome.Application`: Commands, Queries, handlers e portas.
-- `ZFome.Infrastructure`: EF Core, Dapper e adapters técnicos.
-- `ZFome.Contracts`: contratos externos explícitos.
-- `ZFome.Api`: composition root e borda HTTP.
+- isolamento de tenant;
+- validação de entrada com FluentValidation;
+- propagação de `CancellationToken`;
+- acessibilidade e responsividade;
+- contraste nos modos claro e escuro;
+- testes arquiteturais e de integração relevantes.
 
-EF Core atende escrita e migrations; Dapper atende leitura. MediatR e AutoMapper são proibidos. Consulte `openspec/architecture.md`, `openspec/conventions.md` e os ADRs em `openspec/decisions/`.
+## Estrutura do repositório
 
-## Cérebro do projeto
+```text
+src/
+├── ZFome.Domain/                 # Modelo, agregados e regras de domínio
+├── ZFome.Application/            # Commands, Queries, handlers e portas
+├── ZFome.Infrastructure/         # EF Core, Dapper e adapters técnicos
+├── ZFome.Infrastructure.Migrations/
+├── ZFome.Contracts/              # Contratos externos da API
+└── ZFome.Api/                    # Composition root e borda HTTP
 
-O conhecimento de produto, domínio, arquitetura, fluxos e orientações para agentes do zFome está organizado no cofre Obsidian **Cérebro do Arquiteto**, no repositório `Obsidian`, em `Arquiteturando/Projetos/zFome/`. Quando o cofre estiver disponível, desenvolvedores e agentes devem consultá-lo no início de uma tarefa para entender o contexto e navegar até as notas relacionadas. Comece por `00 - Home/Home.md` ou `00 - Home/Mapa do Projeto.md`; a nota `Arquiteturando/Bússola de desenvolvimento para agentes.md` reúne as orientações gerais para agentes.
+web/ZFome.Web/
+├── src/components/               # Componentes compartilhados
+├── src/layouts/                  # Public, Administration, Operations e Platform
+├── src/modules/                  # Features organizadas por domínio
+├── src/pages/                    # Páginas de entrada e páginas específicas
+├── src/themes/                   # Tokens e preferência de aparência
+└── public/brand/                 # Logo e favicon do zFome
 
-O Cérebro e a memória disponível ajudam a compreender o projeto e seu histórico. Para requisitos vigentes e decisões normativas, confirme sempre no `AGENTS.md`, nas specs e changes do OpenSpec, nos ADRs, no Design System e no código atual, conforme aplicável. Se houver divergência, prevalecem essas fontes oficiais. As notas podem ficar desatualizadas; confirme informações voláteis no repositório.
+openspec/                         # Specs, changes e decisões arquiteturais
+docs/                             # Documentação operacional e Design System
+```
 
-## Configuração
+## Documentação
 
-Configurações não sensíveis ficam em `appsettings*.json`. Valores por ambiente usam variáveis com separador `__`, por exemplo `ConnectionStrings__zFome`. Senhas reais, tokens e arquivos `.env` não devem ser versionados.
+- [Design System web](docs/web-design-system.md)
+- [Notificações de pedidos em tempo real](docs/realtime-order-notifications.md)
+- [Arquitetura](openspec/architecture.md)
+- [Convenções](openspec/conventions.md)
+- [Specs e mudanças OpenSpec](openspec/)
+- Cérebro do zFome: `C:\Users\marco\source\repos\Obsidian\Arquiteturando\Projetos\zFome\00 - Home\Home.md` (ambiente local)
+
+O Cérebro do zFome mantém contexto de produto, domínio, fluxos, decisões e histórico. Para requisitos vigentes, prevalecem `AGENTS.md`, OpenSpec, ADRs, Design System e o código atual.
+
+## Próximos passos
+
+- consolidar a experiência de captação e onboarding de estabelecimentos;
+- evoluir descoberta de estabelecimentos por CEP;
+- ampliar notificações e integrações de comunicação;
+- amadurecer autenticação opcional do cliente;
+- acompanhar métricas operacionais e de conversão;
+- manter a evolução incremental do monólito modular.
+
+## Contribuindo
+
+Antes de alterar o projeto:
+
+1. leia o `AGENTS.md` aplicável;
+2. consulte arquitetura, convenções, ADRs e a spec relacionada;
+3. pesquise implementações e componentes existentes;
+4. implemente a menor mudança coerente;
+5. execute build, testes e validações relevantes.
+
+Não adicione MediatR, AutoMapper ou regras de negócio em Controllers. Mudanças arquiteturais exigem ADR antes da implementação.
+
+## Licença
+
+Projeto em desenvolvimento. Consulte os responsáveis pelo repositório antes de redistribuir ou utilizar o software fora do contexto autorizado.
