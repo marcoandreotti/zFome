@@ -19,7 +19,7 @@ describe('preferência de aparência da identidade zFome', () => {
   })
 
   it('não migra a preferência armazenada pela identidade anterior', async () => {
-    localStorage.setItem('orderhub.appearance-mode', 'dark')
+    localStorage.setItem('zfome.appearance-mode', 'dark')
 
     const appearance = await import('../src/themes/appearance')
     appearance.initializeAppearance()
