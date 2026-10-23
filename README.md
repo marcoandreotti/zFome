@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="web/ZFome.Web/public/brand/zfome-logo.png" alt="zFome" width="240" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="web/ZFome.Web/public/brand/zfome-logo-dark.png" />
+    <source media="(prefers-color-scheme: light)" srcset="web/ZFome.Web/public/brand/zfome-logo.png" />
+    <img src="web/ZFome.Web/public/brand/zfome-logo.png" alt="zFome" width="240" />
+  </picture>
 </p>
 
 <p align="center">
