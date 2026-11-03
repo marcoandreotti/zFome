@@ -205,9 +205,11 @@ async function logout() {
   overflow: hidden;
   border: 1px solid var(--zf-border-subtle);
   border-radius: var(--zf-border-radius);
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
   color: var(--zf-text-primary);
-  box-shadow: 0 3px 14px rgb(31 41 55 / 6%);
+  -webkit-backdrop-filter: blur(var(--zf-glass-blur));
+  backdrop-filter: blur(var(--zf-glass-blur));
+  box-shadow: inset 0 1px 0 var(--zf-glass-rim), 0 10px 28px -18px var(--zf-glass-shadow);
 }
 @media (max-width: 600px) {
   .administration-header { margin: 8px 8px 0; }

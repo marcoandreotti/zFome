@@ -432,9 +432,10 @@ function createdTimeLabel(value: string, orderStatus: OrderStatus) {
   gap: 12px;
   margin-bottom: 20px;
   padding: 14px;
-  border: 1px solid var(--zf-border-subtle);
+  border: 0;
   border-radius: var(--zf-border-radius);
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-panel);
+  box-shadow: var(--zf-glass-card-shadow);
 }
 .operations-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); gap: 20px; align-items: start; }
 .status-board { display: grid; grid-template-columns: repeat(4, minmax(230px, 1fr)); gap: 16px; padding-bottom: 12px; }
@@ -443,9 +444,10 @@ function createdTimeLabel(value: string, orderStatus: OrderStatus) {
   min-width: 0;
   min-height: 220px;
   padding: 14px;
-  border: 1px solid var(--zf-border-subtle);
+  border: 0;
   border-radius: var(--zf-border-radius);
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
 }
 .status-column--confirmed { --status-accent: var(--zf-status-confirmed); }
 .status-column--preparing { --status-accent: var(--zf-status-warning); }
@@ -477,7 +479,7 @@ function createdTimeLabel(value: string, orderStatus: OrderStatus) {
   font-size: .875rem;
 }
 .queue-subheading { margin: 12px 0 8px; font-size: .9rem; color: var(--zf-text-muted); }
-.order-detail { position: sticky; top: 92px; max-height: calc(100vh - 116px); overflow: auto; padding: 20px; border-radius: var(--zf-border-radius); background: var(--zf-surface-raised); box-shadow: 0 8px 30px color-mix(in srgb, var(--zf-text-primary) 12%, transparent); }
+.order-detail { position: sticky; top: 92px; max-height: calc(100vh - 116px); overflow: auto; padding: 20px; border-radius: var(--zf-border-radius); background: var(--zf-glass-card); box-shadow: var(--zf-glass-card-shadow); }
 .detail-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .detail-facts div { padding: 10px; border-radius: 8px; background: var(--zf-surface-page); }
 .detail-facts dt { color: var(--zf-text-muted); font-size: .75rem; }

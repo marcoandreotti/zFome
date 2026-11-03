@@ -221,14 +221,14 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
 .tracking-heading > .q-icon, .tracking-card__heading > .q-icon { color: var(--zf-brand-primary-text); }
 .tracking-home-button { min-height: 44px; color: var(--zf-brand-primary-text); }
 .tracking-heading h1 { color: var(--zf-text-primary); font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.12; }
-.tracking-orders { margin: 0 0 24px; padding: 14px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: var(--zf-surface-raised); }
+.tracking-orders { margin: 0 0 24px; padding: 14px; border: 1px solid transparent; border-radius: var(--zf-border-radius); background: var(--zf-glass-card); box-shadow: var(--zf-glass-card-shadow); }
 .tracking-orders__list { display: flex; flex-wrap: wrap; gap: 10px; }
 .tracking-order-link { display: grid; gap: 2px; min-width: 170px; padding: 10px 12px; border: 1px solid var(--zf-border-subtle); border-radius: 10px; color: var(--zf-text-primary); text-decoration: none; }
 .tracking-order-link:hover, .tracking-order-link--active { border-color: var(--zf-brand-primary); background: var(--zf-brand-soft); }
 .tracking-order-link span, .tracking-order-link small { color: var(--zf-text-muted); }
 .tracking-eyebrow { margin: 0 0 5px; color: var(--zf-brand-primary-text); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
 .tracking-loading { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 220px; color: var(--zf-text-muted); }
-.tracking-status-card { display: flex; align-items: center; gap: 18px; margin: 24px 0; padding: 22px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: color-mix(in srgb, var(--zf-brand-soft) 42%, var(--zf-surface-raised)); }
+.tracking-status-card { display: flex; align-items: center; gap: 18px; margin: 24px 0; padding: 22px; border: 1px solid transparent; border-radius: var(--zf-border-radius); background: color-mix(in srgb, var(--zf-brand-soft) 42%, var(--zf-glass-card)); box-shadow: var(--zf-glass-card-shadow); }
 .tracking-status-card__icon { display: grid; flex: 0 0 54px; width: 54px; height: 54px; place-items: center; border-radius: 50%; background: var(--zf-surface-raised); }
 .tracking-status-card__icon--confirmed, .tracking-status-card__icon--info { color: var(--zf-status-info); }
 .tracking-status-card__icon--preparing { color: var(--zf-status-warning-text); }
@@ -243,7 +243,7 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
 .tracking-live > span { width: 8px; height: 8px; border-radius: 50%; background: var(--zf-status-success); }
 .tracking-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); align-items: start; gap: 18px; }
 .tracking-side-column { display: grid; gap: 18px; }
-.tracking-card { min-width: 0; padding: 20px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: var(--zf-surface-raised); }
+.tracking-card { min-width: 0; padding: 20px; border: 1px solid transparent; border-radius: var(--zf-border-radius); background: var(--zf-glass-card); box-shadow: var(--zf-glass-card-shadow); }
 .tracking-card__heading { margin-bottom: 18px; }
 .tracking-card__heading h3 { margin: 0; color: var(--zf-text-primary); font-size: 1.1rem; }
 .timeline { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
@@ -266,7 +266,7 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visib
 .tracking-totals { display: grid; gap: 10px; padding-top: 16px; }
 .tracking-totals > div { display: flex; justify-content: space-between; gap: 12px; color: var(--zf-text-muted); font-size: .9rem; }
 .tracking-totals .tracking-total { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--zf-border-subtle); color: var(--zf-text-primary); font-size: 1rem; }
-.cancel-panel { display: grid; gap: 12px; margin: 0; padding: 20px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); }
+.cancel-panel { display: grid; gap: 12px; margin: 0; padding: 20px; border: 1px solid transparent; border-radius: var(--zf-border-radius); background: var(--zf-glass-card); box-shadow: var(--zf-glass-card-shadow); }
 .cancel-panel .tracking-card__heading { margin-bottom: 0; }
 .cancel-panel > p { margin: 0; color: var(--zf-text-muted); font-size: .9rem; }
 .tracking-cancel-button { min-height: 44px; justify-self: start; }

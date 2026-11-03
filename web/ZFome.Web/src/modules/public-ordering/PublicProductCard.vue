@@ -49,16 +49,17 @@ const image = computed(() => [...props.product.images].sort((a, b) => a.order - 
   min-height: 167px;
   align-items: stretch;
   padding: 0;
-  border: 1px solid var(--zf-border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--zf-border-radius);
   overflow: hidden;
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
   color: var(--zf-text-primary);
   text-align: left;
   cursor: pointer;
   transition: border-color 150ms ease, transform 150ms ease;
 }
-.product-card:hover:not(:disabled) { border-color: var(--zf-brand-primary); transform: translateY(-2px); }
+.product-card:hover:not(:disabled) { border-color: var(--zf-brand-primary); box-shadow: var(--zf-glass-card-shadow), 0 0 0 2px color-mix(in srgb, var(--zf-brand-primary) 22%, transparent); transform: translateY(-2px); }
 .product-card:focus-visible { outline: 3px solid var(--zf-focus-ring); outline-offset: 3px; }
 .product-card:disabled { cursor: not-allowed; opacity: .72; }
 .product-card__media {
