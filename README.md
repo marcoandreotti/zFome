@@ -12,6 +12,13 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" alt=".NET 10" />
+  <img src="https://img.shields.io/badge/Vue.js-Quasar-41B883?logo=vuedotjs&logoColor=white" alt="Vue.js e Quasar" />
+  <img src="https://img.shields.io/badge/PostgreSQL--CQRS-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL e CQRS" />
+  <img src="https://img.shields.io/badge/Arquitetura-Modular%20Monolith-222222" alt="Monólito modular" />
+</p>
+
+<p align="center">
   <a href="#visão-do-produto">Produto</a> ·
   <a href="#arquitetura">Arquitetura</a> ·
   <a href="#executando-localmente">Executar</a> ·
@@ -36,6 +43,16 @@ Ele conecta:
 - configuração multi-tenant com isolamento por estabelecimento.
 
 O projeto está sendo construído como um **monólito modular**, priorizando evolução segura, testes, manutenção e clareza de domínio antes de qualquer extração para serviços independentes.
+
+> O zFome é um projeto de engenharia aplicada: combina domínio de pedidos, operação de cozinha, multi-tenancy, CQRS, persistência especializada, comunicação assíncrona e evolução arquitetural incremental em uma única plataforma.
+
+<p align="center">
+  <img src="docs/assets/zfome-knowledge-brain.png" alt="Ilustração do Cérebro do zFome, um mapa de conhecimento conectado por domínios" width="900" />
+</p>
+
+<p align="center">
+  <em>O Cérebro do zFome conecta produto, domínio, arquitetura, decisões e orientações de desenvolvimento.</em>
+</p>
 
 ## Visão do produto
 
@@ -94,6 +111,26 @@ flowchart TB
     READ --> DB
 ```
 
+### Monólito modular e mensageria
+
+O zFome não começa como um conjunto prematuro de microservices. Os módulos compartilham o processo e o PostgreSQL, mas preservam limites explícitos entre Domain, Application, Infrastructure, Contracts e API.
+
+Para tarefas assíncronas e integrações, o projeto utiliza uma **Transactional Outbox** como fila persistente do monólito:
+
+```mermaid
+flowchart LR
+    CMD[Command / caso de uso] --> TX{Transação PostgreSQL}
+    TX --> BIZ[Dados do negócio]
+    TX --> OUT[(integration.outbox_message)]
+    OUT --> WORKER[OutboxProcessingWorker]
+    WORKER --> RETRY[Retry, lease e idempotência]
+    RETRY --> HANDLER[Handlers de integração]
+```
+
+Isso garante que a alteração de negócio e a mensagem sejam confirmadas juntas. A fila possui processamento pelo menos uma vez, retry com backoff, dead-letter, retenção, leasing concorrente e isolamento por Tenant. A implementação atual está descrita em [docs/transactional-outbox.md](docs/transactional-outbox.md) e no [ADR-003](openspec/decisions/ADR-003-transactional-outbox.md).
+
+Essa escolha mantém o desenvolvimento simples e confiável enquanto o produto evolui dentro do monólito. Um broker externo poderá ser adicionado futuramente sem tornar o domínio dependente dele.
+
 ### Fluxos de escrita e leitura
 
 ```text
@@ -118,6 +155,8 @@ O domínio permanece independente de HTTP, EF Core, Dapper, PostgreSQL, Docker e
 | Execução local | Docker, Docker Compose, Visual Studio |
 | Qualidade | Testes unitários, integração e testes de frontend |
 | Arquitetura | Modular Monolith, Clean Architecture, DDD, CQRS |
+| Mensageria atual | Transactional Outbox, PostgreSQL, Background Worker |
+| Observabilidade atual | Logs estruturados e diagnóstico operacional local |
 
 ## Executando localmente
 
@@ -225,14 +264,44 @@ docs/                             # Documentação operacional e Design System
 
 - [Design System web](docs/web-design-system.md)
 - [Notificações de pedidos em tempo real](docs/realtime-order-notifications.md)
+- [Transactional Outbox](docs/transactional-outbox.md)
 - [Arquitetura](openspec/architecture.md)
 - [Convenções](openspec/conventions.md)
+- [ADR-003 — Transactional Outbox](openspec/decisions/ADR-003-transactional-outbox.md)
 - [Specs e mudanças OpenSpec](openspec/)
 - Cérebro do zFome: `C:\Users\marco\source\repos\Obsidian\Arquiteturando\Projetos\zFome\00 - Home\Home.md` (ambiente local)
 
 O Cérebro do zFome mantém contexto de produto, domínio, fluxos, decisões e histórico. Para requisitos vigentes, prevalecem `AGENTS.md`, OpenSpec, ADRs, Design System e o código atual.
 
-## Próximos passos
+## Evolução planejada
+
+O roadmap técnico separa capacidades existentes de integrações futuras. A intenção é evoluir por necessidade comprovada, mantendo o núcleo do zFome independente de fornecedores.
+
+### RabbitMQ — transporte externo futuro
+
+O RabbitMQ poderá ser introduzido quando houver necessidade de consumidores independentes, maior escala de processamento ou integração entre processos. O desenho previsto é:
+
+```text
+PostgreSQL Outbox → Relay confiável → RabbitMQ → Consumidores
+```
+
+Nesse modelo, a Outbox continua sendo a fonte de confiabilidade transacional e o RabbitMQ atua como transporte distribuído. A implementação exigirá uma spec e um ADR próprios, além de exchanges, filas, routing keys versionadas, publisher confirms, retry, dead-letter e consumidores idempotentes.
+
+O RabbitMQ não faz parte do ambiente padrão atual; o desenvolvimento local poderá utilizá-lo via Docker Compose quando essa capability for aprovada.
+
+### Observability — Datadog futuro
+
+O projeto também prevê uma camada de observabilidade evolutiva, com possibilidade de integração ao Datadog para:
+
+- métricas de API, workers e filas;
+- traces distribuídos entre comandos, Outbox e handlers;
+- logs estruturados correlacionados por requisição, mensagem e Tenant;
+- dashboards de latência, erro, backlog e dead-letter;
+- alertas de falhas, mensagens antigas e degradação operacional.
+
+Até essa integração ser implementada, o projeto mantém diagnóstico local por logs, testes e consultas operacionais documentadas. A observabilidade não deve expor payloads sensíveis, tokens ou dados de outro Tenant.
+
+### Produto e plataforma
 
 - consolidar a experiência de captação e onboarding de estabelecimentos;
 - evoluir descoberta de estabelecimentos por CEP;

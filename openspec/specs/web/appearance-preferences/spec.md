@@ -36,7 +36,7 @@ A aplicação SHALL persistir a opção selecionada no navegador atual e restaur
 
 #### Scenario: Retornar à aplicação
 - **WHEN** a pessoa abre novamente o zFome no mesmo navegador
-- **THEN** a última opção selecionada é restaurada antes da interação com a interface
+- **THEN** a última opção selecionada sob a identidade `zFome` é restaurada antes da interação com a interface
 
 ### Requirement: A aparência preserva identidade e contraste
 
