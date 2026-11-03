@@ -21,6 +21,10 @@ body {
   background: var(--zf-surface-page);
   color: var(--zf-text-primary);
   font-variant-numeric: tabular-nums;
+  background-image:
+    radial-gradient(52rem 30rem at 8% -12rem, color-mix(in srgb, var(--zf-brand-primary) 8%, transparent), transparent 68%),
+    radial-gradient(46rem 28rem at 96% 0, color-mix(in srgb, var(--zf-admin-accent, var(--zf-brand-secondary)) 7%, transparent), transparent 70%);
+  background-attachment: fixed;
 }
 
 ::selection { background: var(--zf-brand-soft); color: var(--zf-text-primary); }
@@ -33,6 +37,47 @@ body {
 .text-negative { color: var(--zf-status-danger) !important; }
 .q-btn.bg-primary { color: var(--zf-brand-on-primary) !important; }
 .q-btn.bg-primary:hover:not(.disabled) { background-color: var(--zf-brand-primary-hover) !important; }
+
+/* Solid Glass: material is carried by semantic surfaces, not by page decoration. */
+.q-card,
+.q-menu,
+.q-dialog__inner > .q-card,
+.q-drawer,
+.zf-glass-panel,
+.zf-glass-card {
+  border: 0;
+  background-color: var(--zf-glass-card);
+  -webkit-backdrop-filter: blur(var(--zf-glass-blur));
+  backdrop-filter: blur(var(--zf-glass-blur));
+  box-shadow: var(--zf-glass-card-shadow);
+}
+.q-menu,
+.q-dialog__inner > .q-card { background-color: var(--zf-glass-popover); }
+.zf-glass-panel { background-color: var(--zf-glass-panel); }
+.q-btn,
+.q-field--outlined .q-field__control,
+.q-chip,
+.zf-glass-control {
+  -webkit-backdrop-filter: blur(var(--zf-glass-control-blur));
+  backdrop-filter: blur(var(--zf-glass-control-blur));
+}
+.q-btn:not(.q-btn--flat):not(.q-btn--unelevated) {
+  box-shadow: inset 0 1px 0 var(--zf-glass-rim), 0 1px 2px var(--zf-glass-contact);
+}
+.q-btn:hover:not(.disabled) { box-shadow: inset 0 1px 0 var(--zf-glass-rim), 0 8px 18px -8px var(--zf-glass-shadow); }
+.q-field--outlined .q-field__control:before { border-color: var(--zf-glass-edge); }
+.q-field--outlined .q-field__control:hover:before { border-color: var(--zf-brand-primary); }
+.q-field--outlined.q-field--focused .q-field__control:after { border-color: var(--zf-focus-ring); box-shadow: 0 0 0 3px var(--zf-glass-focus); }
+.q-item--active,
+.q-item[active] { background: var(--zf-glass-state); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+@media (max-width: 700px) {
+  body { background-attachment: scroll; }
+}
 
 /* Administration's analytics-inspired workspace palette stays surface-scoped. */
 [data-surface='administration'] {
@@ -53,6 +98,26 @@ body {
 [data-surface='administration'] .q-page-container,
 [data-surface='administration'] #admin-content {
   background: var(--zf-surface-page);
+}
+
+/* Operational surfaces keep the material quiet so tickets and timers stay primary. */
+[data-surface='operations'] {
+  --zf-glass-blur: 8px;
+  --zf-glass-card: var(--zf-surface-raised);
+  --zf-glass-panel: var(--zf-surface-page);
+}
+[data-surface='operations'] .q-card,
+[data-surface='operations'] .q-menu,
+[data-surface='operations'] .q-dialog__inner > .q-card {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 var(--zf-glass-rim), 0 1px 2px var(--zf-glass-contact), 0 8px 22px -16px var(--zf-glass-shadow);
+}
+
+/* The public surface accepts Tenant colour and imagery; material stays translucent but calm. */
+[data-surface='public'] {
+  --zf-glass-blur: 14px;
+  --zf-glass-card: color-mix(in srgb, var(--zf-surface-raised) 96%, transparent);
 }
 
 .collection-action-btn {
@@ -213,12 +278,13 @@ body {
   align-items: center;
   gap: 12px;
   overflow: hidden;
-  border: 1px solid var(--zf-border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--zf-border-radius);
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
   padding: 10px;
 }
-.admin-product-card--inactive { border-style: dashed; }
+.admin-product-card--inactive { border-color: var(--zf-border-subtle); border-style: dashed; }
 .admin-product-card__image,
 .admin-product-card__placeholder {
   flex: 0 0 clamp(92px, 36%, 124px);
@@ -332,7 +398,12 @@ body {
   width: min(100%, 960px);
   margin: 0 auto 24px;
 }
-.ordering-hero { align-items: flex-start; flex-wrap: wrap; }
+.ordering-hero {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
+}
 .ordering-context { min-width: 0; flex: 1 1 180px; }
 .ordering-context h1 { max-width: 100%; overflow-wrap: anywhere; }
 .resume-order {
@@ -393,15 +464,16 @@ body {
   display: flex;
   min-height: 126px;
   padding: 0;
-  border: 1px solid var(--zf-border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--zf-border-radius);
   overflow: hidden;
   text-align: left;
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
   color: inherit;
   cursor: pointer;
 }
-.product-card:hover:not(:disabled) { border-color: var(--zf-brand-primary); box-shadow: 0 4px 14px rgb(31 41 55 / 8%); }
+.product-card:hover:not(:disabled) { border-color: var(--zf-brand-primary); box-shadow: var(--zf-glass-card-shadow), 0 0 0 2px color-mix(in srgb, var(--zf-brand-primary) 22%, transparent); }
 .product-card:disabled { cursor: not-allowed; }
 .product-card img { width: 96px; min-width: 96px; object-fit: cover; }
 .product-card > span { display: grid; min-width: 0; gap: 6px; padding: 14px; }
@@ -411,7 +483,8 @@ body {
 .flow-panel, .state-panel {
   padding: 24px;
   border-radius: var(--zf-border-radius);
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
 }
 .state-panel { text-align: center; }
 .cart-list { padding: 0; list-style: none; }

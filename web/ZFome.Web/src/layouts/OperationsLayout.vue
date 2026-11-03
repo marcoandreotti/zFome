@@ -88,8 +88,11 @@ async function logout() {
 <style scoped>
 .operations-header {
   border-bottom: 2px solid var(--zf-brand-primary);
-  background: var(--zf-navigation-background);
+  background: color-mix(in srgb, var(--zf-navigation-background) 92%, transparent);
   color: var(--zf-navigation-text);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent), 0 10px 24px -18px rgb(0 0 0 / 60%);
 }
 
 .operations-toolbar { min-height: 64px; gap: 20px; }

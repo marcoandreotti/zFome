@@ -73,9 +73,10 @@ defineEmits<{
 .order-card-shell {
   margin-bottom: 10px;
   overflow: hidden;
-  border: 1px solid var(--zf-border-subtle);
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
+  box-shadow: var(--zf-glass-card-shadow);
 }
 .order-card-shell:hover, .order-card-shell.selected { border-color: var(--zf-brand-primary); }
 .order-card-shell.late { border-color: var(--zf-status-urgency); }
