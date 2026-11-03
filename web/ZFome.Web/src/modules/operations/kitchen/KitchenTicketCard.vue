@@ -72,7 +72,7 @@ const serviceTone = computed(() => `service--${props.ticket.serviceType.toLowerC
 </template>
 
 <style scoped>
-.kitchen-ticket { min-width: 0; margin-bottom: 14px; padding: 18px; overflow-wrap: anywhere; border: 2px solid transparent; border-radius: 12px; background: var(--zf-surface-raised); box-shadow: 0 2px 8px color-mix(in srgb, var(--zf-text-primary) 9%, transparent); }
+.kitchen-ticket { min-width: 0; margin-bottom: 14px; padding: 18px; overflow-wrap: anywhere; border: 1px solid transparent; border-radius: 12px; background: var(--zf-glass-card); box-shadow: var(--zf-glass-card-shadow); }
 .kitchen-ticket.late { border-color: var(--zf-status-urgency); }
 .kitchen-ticket > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .ticket-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

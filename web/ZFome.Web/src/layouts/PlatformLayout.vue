@@ -21,7 +21,10 @@ async function logout() { try { await session.logout() } finally { await router.
 </template>
 <style scoped>
 .platform-header {
-  background: var(--zf-surface-raised);
+  background: var(--zf-glass-card);
   color: var(--zf-text-primary);
+  -webkit-backdrop-filter: blur(var(--zf-glass-blur));
+  backdrop-filter: blur(var(--zf-glass-blur));
+  box-shadow: inset 0 1px 0 var(--zf-glass-rim), 0 10px 28px -18px var(--zf-glass-shadow);
 }
 </style>

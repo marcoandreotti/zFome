@@ -819,9 +819,10 @@ onBeforeUnmount(() => {
   min-height: 190px;
   margin: 20px auto 24px;
   padding: clamp(22px, 4vw, 40px);
-  border: 1px solid var(--zf-border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--zf-border-radius);
-  background: color-mix(in srgb, var(--zf-brand-primary) 8%, var(--zf-surface-raised));
+  background: color-mix(in srgb, var(--zf-brand-primary) 8%, var(--zf-glass-card));
+  box-shadow: var(--zf-glass-card-shadow);
 }
 .public-menu-page :deep(.ordering-context h1) {
   font-size: clamp(2rem, 5vw, 3.5rem);

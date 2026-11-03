@@ -121,6 +121,22 @@ Não criar um layout genérico para unificar superfícies com propósitos difere
 
 ## Tokens
 
+### Materialidade Solid Glass
+
+O frontend utiliza uma adaptação do Solid Glass como linguagem material transversal.
+Ela é implementada nos tokens locais, sem adicionar React, Tailwind, shadcn/ui ou
+outra biblioteca visual. `--zf-glass-panel`, `--zf-glass-card` e
+`--zf-glass-popover` representam espessuras crescentes; `--zf-glass-rim`,
+`--zf-glass-inner`, `--zf-glass-edge`, `--zf-glass-contact` e
+`--zf-glass-shadow` compõem o acabamento de borda e sombra. Os tokens de blur devem
+ser usados com moderação e nunca podem substituir contraste, texto ou ícone de estado.
+
+Administration é a superfície de maior expressão do material. Public usa materialidade
+moderada para preservar imagens, descoberta e identidade do Tenant. Operations e KDS
+reduzem blur e transparência para manter leitura rápida e desempenho em monitores e
+tablets. Platform pode usar o material moderadamente. A decisão completa está em
+`openspec/decisions/ADR-005-solid-glass-visual-language.md`.
+
 ### Tokens implementados
 
 `_tokens.scss` define atualmente:

@@ -32,7 +32,7 @@ defineEmits<{ advance: [ticket: KitchenTicket] }>()
 </template>
 
 <style scoped>
-.kds-column { min-width: 0; min-height: 360px; padding: 16px; border-radius: var(--zf-border-radius); background: color-mix(in srgb, var(--zf-border-subtle) 48%, var(--zf-surface-page)); }
+.kds-column { min-width: 0; min-height: 360px; padding: 16px; border-radius: var(--zf-border-radius); background: var(--zf-glass-panel); box-shadow: var(--zf-glass-card-shadow); }
 .kds-column h2 { position: relative; display: grid; place-items: center; min-height: 48px; margin: 0 0 14px; padding: 8px 44px; border-radius: 8px; font-size: 1.1rem; text-align: center; }
 .kds-column--waiting h2 { background: color-mix(in srgb, var(--zf-status-confirmed) 14%, var(--zf-surface-raised)); color: var(--zf-status-confirmed); }
 .kds-column--preparing h2 { background: color-mix(in srgb, var(--zf-status-preparing) 18%, var(--zf-surface-raised)); color: var(--zf-status-warning-text); }

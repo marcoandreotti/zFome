@@ -158,7 +158,7 @@ onMounted(load)
 
 <style scoped>
 .review-layout { width: min(100%, 1100px); margin: 20px auto 36px; }
-.review-establishment-hero { align-items: center; width: 100%; min-height: 190px; margin: 0 auto 24px; padding: clamp(22px, 4vw, 40px); border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: color-mix(in srgb, var(--zf-brand-primary) 8%, var(--zf-surface-raised)); }
+.review-establishment-hero { align-items: center; width: 100%; min-height: 190px; margin: 0 auto 24px; padding: clamp(22px, 4vw, 40px); border: 1px solid transparent; border-radius: var(--zf-border-radius); background: color-mix(in srgb, var(--zf-brand-primary) 8%, var(--zf-glass-card)); box-shadow: var(--zf-glass-card-shadow); }
 .review-establishment-hero .ordering-context h1 { max-width: 100%; overflow-wrap: anywhere; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; letter-spacing: -.025em; }
 .review-establishment-hero .ordering-context > p:last-child { margin: 10px 0 0; color: var(--zf-text-muted); font-size: 1.05rem; }
 .review-establishment-hero .ordering-logo, .review-establishment-hero .ordering-unit-mark { flex: 0 0 clamp(64px, 10vw, 96px); width: clamp(64px, 10vw, 96px); height: clamp(64px, 10vw, 96px); padding: 8px; border: 1px solid var(--zf-border-subtle); border-radius: 18px; background: var(--zf-surface-raised); }
@@ -168,7 +168,7 @@ onMounted(load)
 .review-content { width: min(100%, 760px); margin: 0 auto; padding: clamp(20px, 4vw, 32px) 0; }
 .review-navigation { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
 .review-eyebrow { margin: 0 0 5px; color: var(--zf-brand-primary-text); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
-.review-submitted { display: grid; gap: 16px; padding: 24px; border: 1px solid var(--zf-border-subtle); border-radius: var(--zf-border-radius); background: var(--zf-surface-raised); }
+.review-submitted { display: grid; gap: 16px; padding: 24px; border: 1px solid transparent; border-radius: var(--zf-border-radius); background: var(--zf-glass-card); box-shadow: var(--zf-glass-card-shadow); }
 .review-submitted__heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; color: var(--zf-status-success-text); }
 .review-submitted__heading h2 { margin: 0; color: var(--zf-text-primary); font-size: 1.5rem; }
 .review-submitted__rating { display: flex; align-items: center; gap: 12px; color: var(--zf-text-primary); }
